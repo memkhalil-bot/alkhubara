@@ -98,4 +98,4 @@ $('logout').onclick=async()=>{await sb.auth.signOut();location.replace('./login.
  if((role==='super_admin'||grant('audit.view'))){const {data,error}=await sb.from('staff_profiles').select('user_id,full_name').limit(500);if(!error){staff=data;const select=$('auditActor');select.replaceChildren();const all=document.createElement('option');all.value='';all.textContent='الكل';select.append(all);for(const p of staff){const op=document.createElement('option');op.value=p.user_id;op.textContent=p.full_name;select.append(op)}}}
  $('gate').remove();$('app').style.display='block';await reports()
  }catch(e){location.replace('./login.html')}})();
-</script></body></html>
+</script><script src="./table-enhancements.js" defer></script></body></html>
