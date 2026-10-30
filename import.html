@@ -1,0 +1,81 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>استيراد Excel | مركز الخبراء</title><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>:root{font-family:Cairo,Tahoma,Arial,sans-serif;background:#f5f7f6;color:#19392f}*{box-sizing:border-box}body{margin:0}header{background:#123b38;color:#fff;padding:16px clamp(12px,3vw,35px);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}h1{margin:0;font-size:22px}main{max-width:1150px;margin:auto;padding:16px}.panel{background:white;border:1px solid #dce8df;padding:18px;border-radius:12px;margin-bottom:14px}.note{background:#fff8e9;border-right:4px solid #d2a046;padding:12px;font-size:13px;line-height:1.9;margin-bottom:13px}h2{font-size:18px}button{font:700 13px Cairo,Tahoma,Arial,sans-serif;cursor:pointer;background:#12604d;color:white;border:0;border-radius:9px;padding:10px 16px;min-height:44px}button.secondary{background:#e8f2ed;color:#174e3c}button:disabled{opacity:.5;cursor:not-allowed}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.wrap{overflow-x:auto}table{width:100%;min-width:700px;border-collapse:collapse}td,th{padding:10px;text-align:right;border-bottom:1px solid #e5ece6;font-size:12px}th{background:#f1f7f2}input,select{font:inherit;border-radius:8px;border:1px solid #c6d8cf;padding:9px;min-height:44px}.muted{font-size:13px;color:#627a6a;line-height:1.8}#app{display:none}#gate{text-align:center;margin:15vh auto}#status{white-space:pre-line;font-size:13px;line-height:1.8}.error{color:#af2929}a{color:inherit}@media(max-width:500px){main{padding:10px}.panel{padding:12px}}</style></head><body>
+<p id="gate">جارٍ التحقق من صلاحيات استيراد البيانات...</p><div id="app"><header><h1>استيراد البيانات القديمة من Excel</h1><a href="./people.html"><button class="secondary">الطلاب والمدرسون</button></a></header><main>
+<div class="note">ابدأ بالقالب المنظم. أسماء الشيتات المطلوبة: Students وTeachers وSubjects. كل طالب أو مدرس سطر واحد، واكتب المواد في عمود subjects مفصولة بعلامة |. سيولد النظام كودًا تلقائيًا لكل سجل. ننصح بأخذ نسخة احتياطية قبل الاستيراد، ومراجعة ملفك لتجنب التكرار.</div>
+<div class="panel"><h2>1. اختيار الملف ومراجعته</h2><div class="row"><input id="file" type="file" accept=".xlsx,.xls" aria-label="ملف Excel"><button id="preview">معاينة الملف</button><button class="secondary" id="clear">مسح المعاينة</button></div><p class="muted">بإمكانك استخدام <a href="https://alkhubara-git-feature-supabase-auth-responsive-mohkhalil.vercel.app/import.html">هذه الصفحة</a> بعد إعداد ملفك. القالب الجاهز متاح في المحادثة أيضًا.</p>
+<p id="status" role="status"></p><div id="counts" class="muted"></div><div class="wrap"><table><thead><tr><th>الشيت</th><th>الصف</th><th>الاسم</th><th>المواد</th><th>نتيجة الفحص</th></tr></thead><tbody id="rows"></tbody></table></div></div>
+<div class="panel"><h2>2. اعتماد الاستيراد</h2><p class="muted">لن يتم حفظ أي بيانات قبل الضغط على اعتماد الاستيراد. يتم التحقق من الأسماء والإيميلات والهواتف والتكرارات داخل الملف ومقارنتها بالسجلات الحالية. عند فشل أي صف أثناء الحفظ سيظهر خطأ واضح؛ الاستيراد ليس معاملة واحدة شاملة، وقد يتطلب استكمال الصفوف التي فشلت دون إعادة الصفوف الناجحة.</p>
+<button id="import" disabled>اعتماد استيراد البيانات</button><p id="result" role="status" class="muted"></p></div></main></div>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script type="module">
+import{createClient}from'https://esm.sh/@supabase/supabase-js@2.57.0';
+const sb=createClient('https://uqjoxgcddpwfbjanzqpy.supabase.co',"sb_publishable_-FhtYmDD0qO6mEB2nBE_rQ_j_SE_unY");const $=x=>document.getElementById(x);
+let uid='',role='',grants=new Set(),entries=[],existing={students:new Set(),teachers:new Set()},existingSubjects=new Map(),previewValid=false;
+const allow=k=>role==='super_admin'||grants.has(k);
+const norm=x=>String(x??'').trim(),keyOf=x=>norm(x).toLocaleLowerCase('en');
+const setStatus=(s,error=false)=>{$('status').textContent=s;$('status').className=error?'error':''};
+const columns={Students:['full_name','phone','email','university','faculty','specialization','subjects'],Teachers:['full_name','phone','email','subjects'],Subjects:['subject_name']};
+function field(obj,k){return norm(obj[k])}
+function key(r){return keyOf(r.email)||keyOf(r.phone)||keyOf(r.full_name)}
+function td(tr,s){const cell=document.createElement('td');cell.textContent=s;tr.append(cell)}
+function show(){const rows=$('rows');rows.replaceChildren();for(const row of entries.slice(0,120)){const tr=document.createElement('tr');[row.sheet,row.number,row.name,row.subjects||'—',row.issues.length?row.issues.join('؛ '):'جاهز'].forEach(v=>td(tr,v));rows.append(tr)}}
+async function currentPeople(kind){const rows=[];for(let from=0;from<5000;from+=500){const{data,error}=await sb.from(kind).select('full_name,email,phone').range(from,from+499);if(error)throw Error(error.message);rows.push(...data);if(data.length<500)return rows}throw Error('Too many existing '+kind+' records to safely check duplicates')}
+async function scan(){
+ $('import').disabled=true;previewValid=false;entries=[];$('result').textContent='';
+ if(!window.XLSX)throw Error('تعذر تحميل قارئ Excel. تحقق من الاتصال بالإنترنت.');
+ const file=$('file').files[0];if(!file)throw Error('اختر ملف Excel أولًا');if(file.size>5*1024*1024)throw Error('أقصى حجم للملف 5MB');
+ const book=XLSX.read(await file.arrayBuffer(),{type:'array',cellDates:false});const errors=[];const result=[];
+ for(const sheetName of ['Students','Teachers','Subjects']){const ws=book.Sheets[sheetName];if(!ws)continue;const matrix=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});const actual=(matrix[0]||[]).map(norm);
+ const required=columns[sheetName];if(required.some(x=>!actual.includes(x)))throw Error('شيت '+sheetName+' يفتقد الأعمدة المطلوبة: '+required.join(', '));
+ const json=XLSX.utils.sheet_to_json(ws,{defval:'',raw:false});for(let i=0;i<json.length;i++){
+ const r=json[i],name=sheetName==='Subjects'?field(r,'subject_name'):field(r,'full_name'),subjects=field(r,'subjects'),issues=[];
+ if(name.length<2||name.length>200)issues.push('الاسم غير صالح');
+ if(sheetName!=='Subjects'){const mail=field(r,'email');if(mail&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail))issues.push('الإيميل غير صالح');if(field(r,'phone').length>40)issues.push('الهاتف طويل');}
+ result.push({sheet:sheetName,number:i+2,name,subjects,raw:r,issues})}
+ }
+ if(!result.length)throw Error('لا توجد صفوف للاستيراد');
+ const [students,teachers,subjects]=await Promise.all([currentPeople('students'),currentPeople('teachers'),sb.from('academic_subjects').select('id,subject_name').limit(1000)]);
+ if(subjects.error)throw Error(subjects.error.message);
+ existingSubjects=new Map((subjects.data||[]).map(s=>[keyOf(s.subject_name),s.id]));
+ for(const kind of ['students','teachers']){existing[kind]=new Set();for(const r of (kind==='students'?students:teachers))for(const x of [r.full_name,r.email,r.phone])if(norm(x))existing[kind].add(keyOf(x))}
+ const seen={Students:new Set(),Teachers:new Set(),Subjects:new Set()};
+ for(const row of result){if(row.sheet==='Subjects'){if(seen.Subjects.has(keyOf(row.name)))row.issues.push('مادة مكررة داخل الملف');seen.Subjects.add(keyOf(row.name));continue}
+ const target=row.sheet==='Students'?'students':'teachers';const values=[row.name,field(row.raw,'email'),field(row.raw,'phone')].filter(Boolean).map(keyOf);
+ if(values.some(x=>existing[target].has(x)))row.issues.push('الاسم أو الهاتف أو الإيميل موجود مسبقًا');
+ if(values.some(x=>seen[row.sheet].has(x)))row.issues.push('سجل مكرر في الملف');
+ for(const x of values)seen[row.sheet].add(x);
+ if(target==='students'&&['university','faculty','specialization'].some(x=>field(row.raw,x).length>200))row.issues.push('حقل أكاديمي طويل');
+ }
+ entries=result;const problematic=result.filter(x=>x.issues.length);
+ $('counts').textContent='طلاب: '+result.filter(x=>x.sheet==='Students').length+' · مدرسون: '+result.filter(x=>x.sheet==='Teachers').length+' · مواد جديدة: '+result.filter(x=>x.sheet==='Subjects').length+' · أخطاء: '+problematic.length;
+ previewValid=problematic.length===0 && result.some(x=>x.sheet==='Students'||x.sheet==='Teachers');$('import').disabled=!previewValid;show();
+ setStatus(problematic.length?'يوجد '+problematic.length+' صف يحتاج تصحيحًا قبل الحفظ':'المعاينة ناجحة. يمكنك اعتماد الاستيراد.');
+}
+$('preview').onclick=async()=>{try{setStatus('جارٍ فحص الملف...');await scan()}catch(e){setStatus(e.message,true);$('import').disabled=true}};
+$('clear').onclick=()=>{entries=[];previewValid=false;$('file').value='';$('rows').replaceChildren();$('counts').textContent='';setStatus('');$('import').disabled=true};
+$('import').onclick=async()=>{
+ if(!previewValid||!confirm('تأكيد استيراد البيانات بعد مراجعتها؟'))return;
+ $('import').disabled=true;$('preview').disabled=true;let success=0,fail=0;const failures=[];$('result').textContent='جارٍ الاستيراد...';
+ try{
+ const subjectNames=new Set(entries.filter(e=>e.sheet==='Subjects').map(e=>e.name));
+ for(const e of entries.filter(e=>e.sheet!=='Subjects'))for(const x of e.subjects.split('|').map(norm).filter(Boolean))subjectNames.add(x);
+ for(const name of subjectNames){if(existingSubjects.has(keyOf(name)))continue;const {data,error}=await sb.rpc('create_academic_subject',{subject_name_input:name});if(error)throw Error('خطأ في مادة '+name+': '+error.message);existingSubjects.set(keyOf(name),data)}
+ for(const row of entries.filter(e=>e.sheet!=='Subjects')){
+  const kind=row.sheet==='Students'?'students':'teachers';
+  if(!allow(kind+'.edit')){fail++;failures.push(row.sheet+' صف '+row.number+': لا تملك صلاحية إضافة');continue}
+  const r=row.raw,payload={full_name:row.name,phone:field(r,'phone')||null,email:field(r,'email')||null,created_by:uid,updated_by:uid};
+  if(kind==='students')Object.assign(payload,{university:field(r,'university')||null,faculty:field(r,'faculty')||null,specialization:field(r,'specialization')||null});
+  const {data,error}=await sb.from(kind).insert(payload).select('id').single();
+  if(error){fail++;failures.push(row.sheet+' صف '+row.number+': '+error.message);continue}
+  const ids=[...new Set(row.subjects.split('|').map(norm).filter(Boolean).map(x=>existingSubjects.get(keyOf(x))).filter(Boolean))];
+  const update=await sb.rpc('set_person_subjects',{kind,person:data.id,ids});
+  if(update.error){fail++;failures.push(row.sheet+' صف '+row.number+': تم حفظ الشخص ولكن تعذر ربط المواد: '+update.error.message);continue}
+  success++;$('result').textContent='تم حفظ '+success+'، أخطاء '+fail;
+ }
+ $('result').textContent='النتيجة: تم '+success+'، أخطاء '+fail+'. '+(failures.length?'\n'+failures.slice(0,12).join('\n'):'يمكن فتح الطلاب والمدرسين لمراجعة الأكواد الجديدة.');
+ previewValid=false;
+ }catch(e){$('result').textContent='توقف الاستيراد: '+e.message+' · نجاح '+success+' · أخطاء '+fail}
+ finally{$('preview').disabled=false}
+};
+(async()=>{try{const {data:{user},error}=await sb.auth.getUser();if(error||!user)throw Error('login');uid=user.id;const {data:p,error:pe}=await sb.from('staff_profiles').select('role,is_active').eq('user_id',uid).single();if(pe||!p?.is_active)throw Error('role');role=p.role;const {data:a,error:ae}=await sb.from('user_permissions').select('permission');if(ae)throw Error(ae.message);grants=new Set((a||[]).map(x=>x.permission));if(!allow('students.edit')&&!allow('teachers.edit'))throw Error('permission');$('gate').remove();$('app').style.display='block'}catch(e){location.replace('./dashboard.html')}})();
+</script></body></html>
