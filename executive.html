@@ -100,6 +100,8 @@ async function refresh(){
  {label:'الخدمات التعليمية',value:f(ss.length)},
  {label:'قيمة النشاط المكتمل المسعّر',value:money(earned),note:'تقديري · ليس فواتير'},
  {label:'التحصيلات الصافية للفترة',value:money(receipts)},
+ {label:'إجمالي أرصدة الطلاب التقديرية',value:money(debts.reduce((a,x)=>a+x.balance,0))},
+ {label:'عدد الطلاب ذوي الرصيد',value:f(debts.length)},
  {label:'مصروفات المركز',value:money(expenses)},
  {label:'مستحقات المدرسين للحصص',value:money(teacherEarned),note:'المكتملة المسعّرة'},
  {label:'المدفوع للمدرسين',value:money(teacherPaid)},
