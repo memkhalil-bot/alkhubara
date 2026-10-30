@@ -25,9 +25,10 @@ button{font:700 14px Cairo,Tahoma,Arial,sans-serif;min-height:44px;background:#1
 </section></main></div><script type="module">
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.0';
 const sb=createClient('https://uqjoxgcddpwfbjanzqpy.supabase.co',"sb_publishable_-FhtYmDD0qO6mEB2nBE_rQ_j_SE_unY");
+async function getGrants(client){const{data,error}=await client.from('user_permissions').select('permission');if(error)throw Error(error.message);const allowed=new Set((data||[]).map(x=>x.permission));return key=>allowed.has(key)}
 const $=id=>document.getElementById(id),fmt=v=>Number(v||0).toLocaleString('ar-QA',{maximumFractionDigits:2});
 let role='',people=[],teachers=[],lessonsCache=[],auditCache=[],auditOffset=0,staff=[],loginCache=[];
-const financeRoles=['accountant','admin','super_admin'],manageRoles=['admin','super_admin'];
+let grant=()=>false;const financeRoles=['accountant','admin','super_admin'],manageRoles=['admin','super_admin'];
 const labels={scheduled:'مجدولة',confirmed:'مؤكدة',completed:'مكتملة',cancelled:'ملغاة',new:'جديدة',in_progress:'قيد التنفيذ',unpaid:'غير مدفوع',partial:'جزئي',paid:'مدفوع',homework:'واجب',research:'بحث',project:'مشروع',other:'أخرى'};
 const typeNames={students:'الطلاب',teachers:'المدرسون',lessons:'الحصص',educational_services:'الخدمات',lesson_rates:'أسعار الحصص',service_prices:'أسعار الخدمات',financial_entries:'القيود المالية',invoices:'الفواتير',receipt_allocations:'توزيع الدفعات'};
 function caption(x){return labels[x]||x||'—'}function person(arr,id){return arr.find(p=>p.id===id)?.full_name||'—'}
@@ -52,7 +53,7 @@ async function reports(){
  renderRows('serviceRows',sv.map(x=>[x.service_date,person(people,x.student_id),caption(x.service_type),x.description,caption(x.status)]),5);
  $('lessonCount').textContent=fmt(ls.length);$('completeCount').textContent=fmt(ls.filter(x=>x.status==='completed').length);
  $('hoursCount').textContent=fmt(ls.filter(x=>x.status==='completed').reduce((a,l)=>a+Number(l.hours),0));$('serviceCount').textContent=fmt(sv.length);
- if(financeRoles.includes(role)){
+ if((role==='super_admin'||grant('finance.view')||grant('finance.edit'))){
  const entries=await getRows('financial_entries','id,entry_date,entry_type,amount,reverses_entry_id');
  const reversed=new Set(entries.filter(e=>e.entry_type==='reversal').map(e=>e.reverses_entry_id));
  const active=entries.filter(e=>e.entry_type!=='reversal'&&!reversed.has(e.id)&&validDate(e.entry_date));
@@ -64,7 +65,7 @@ async function reports(){
 function summary(before,after){if(!before)return 'إنشاء سجل';if(!after)return '—';const keys=Object.keys(after).filter(k=>!['updated_at','updated_by','created_at','created_by'].includes(k)&&JSON.stringify(before[k])!==JSON.stringify(after[k]));return keys.length?'تعديل: '+keys.slice(0,6).join('، '):'تحديث بدون تغيير حقول أساسية'}
 function auditLine(e){return [new Date(e.occurred_at).toLocaleString('ar-QA'),staff.find(p=>p.user_id===e.actor_id)?.full_name||'مستخدم غير معروف',({create:'إضافة',update:'تعديل',archive:'أرشفة',restore:'استعادة'}[e.action]||e.action),typeNames[e.entity_type]||e.entity_type,e.entity_id||'—',summary(e.before_data,e.after_data)]}
 async function audit(reset=true){
- if(!manageRoles.includes(role))return;
+ if(!(role==='super_admin'||grant('audit.view')))return;
  if(reset){auditOffset=0;auditCache=[]}
  $('auditStatus').textContent='جارٍ التحميل...';
  try{
@@ -78,7 +79,7 @@ async function audit(reset=true){
  $('moreAudit').disabled=data.length<50;$('exportAudit').disabled=!auditCache.length;$('auditStatus').textContent='تم عرض '+auditCache.length+' عملية، مع إمكانية تحميل صفحات إضافية.';
  }catch(e){$('auditStatus').textContent='تعذر تحميل السجل: '+e.message}}
 async function logins(){
- if(!manageRoles.includes(role))return;
+ if(!(role==='super_admin'||grant('audit.view')))return;
  try{const {data,error}=await sb.from('login_events').select('user_id,event_type,occurred_at').order('occurred_at',{ascending:false}).limit(100);if(error)throw Error(error.message);
  loginCache=data;renderRows('loginRows',data.map(e=>[new Date(e.occurred_at).toLocaleString('ar-QA'),staff.find(p=>p.user_id===e.user_id)?.full_name||'—',e.event_type]),3)}
  catch(e){renderRows('loginRows',[],3)}
@@ -91,10 +92,10 @@ $('exportAudit').onclick=()=>csvDownload('experts-audit-report.csv',['التار
 $('logout').onclick=async()=>{await sb.auth.signOut();location.replace('./login.html')};
 (async()=>{try{const {data:{user},error}=await sb.auth.getUser();if(error||!user)throw Error('auth');
  const {data:p,error:pe}=await sb.from('staff_profiles').select('role,is_active').eq('user_id',user.id).single();
- if(pe||!p?.is_active||!['secretary','accountant','admin','super_admin'].includes(p.role))throw Error('permission');
- role=p.role;$('financePanel').hidden=!financeRoles.includes(role);$('auditTab').hidden=!manageRoles.includes(role);
+ if(pe||!p?.is_active)throw Error('permission');grant=await getGrants(sb);if(p.role!=='super_admin'&&!grant('reports.view')&&!grant('audit.view'))throw Error('permission');
+ role=p.role;$('financePanel').hidden=!(role==='super_admin'||grant('finance.view')||grant('finance.edit'));$('auditTab').hidden=!(role==='super_admin'||grant('audit.view'));
  const [s,t]=await Promise.all([getRows('students','id,full_name'),getRows('teachers','id,full_name')]);people=s;teachers=t;options('student',people);options('teacher',teachers);
- if(manageRoles.includes(role)){const {data,error}=await sb.from('staff_profiles').select('user_id,full_name').limit(500);if(!error){staff=data;const select=$('auditActor');select.replaceChildren();const all=document.createElement('option');all.value='';all.textContent='الكل';select.append(all);for(const p of staff){const op=document.createElement('option');op.value=p.user_id;op.textContent=p.full_name;select.append(op)}}}
+ if((role==='super_admin'||grant('audit.view'))){const {data,error}=await sb.from('staff_profiles').select('user_id,full_name').limit(500);if(!error){staff=data;const select=$('auditActor');select.replaceChildren();const all=document.createElement('option');all.value='';all.textContent='الكل';select.append(all);for(const p of staff){const op=document.createElement('option');op.value=p.user_id;op.textContent=p.full_name;select.append(op)}}}
  $('gate').remove();$('app').style.display='block';await reports()
  }catch(e){location.replace('./login.html')}})();
 </script></body></html>
