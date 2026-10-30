@@ -19,10 +19,10 @@ h2{margin:0 0 8px;font-size:20px}p{line-height:1.9;color:#526862}button{font:700
 <main>
 <div class="card"><span class="pill" id="role">موظف</span><h2 id="greeting" style="margin-top:12px">مرحبًا</h2><p id="email"></p>
 <div class="notice">تم ربط وحدة الطلاب والمدرسين بقاعدة البيانات مع الصلاحيات. تم ربط الحصص والخدمات ودفتر القيود المالية، ببيانات اختبارية فقط حاليًا. التسعير ومستحقات المدرسين المحسوبة تلقائيًا قيد التطوير.</div></div>
-<div id="executiveTile" class="card" style="display:none;border-right:5px solid #13815e"><h2>لوحة المؤشرات التنفيذية</h2><p>مؤشرات الأداء والمالية، المواد والمدرسون الأكثر نشاطًا، والتنبيهات والطباعة بالعرض.</p><p><a href="./executive.html"><strong>فتح Executive Dashboard ←</strong></a></p></div><div class="grid">
-<div class="tile"><strong>الطلاب والمدرسون</strong><span>إدارة السجلات، البحث، والتعديل والأرشفة</span><p><a href="./people.html">فتح وحدة الطلاب والمدرسين ←</a></p></div>
-<div class="tile"><strong>الحصص والخدمات</strong><span>إضافة وتعديل وأرشفة الحصص والخدمات التعليمية</span><p><a href="./operations.html">فتح الحصص والخدمات ←</a></p></div>
-<div class="tile" id="financeTile" style="display:none"><strong>الحسابات المالية</strong><span>التحصيلات والمصروفات وصرف المدرسين</span><p><a href="./finance.html">فتح دفتر الحركات المالية ←</a></p></div><div class="tile" id="pricingTile" style="display:none"><strong>التسعير ومستحقات المدرسين</strong><span>أسعار الحصص والخدمات واحتساب مستحقات المدرسين</span><p><a href="./pricing.html">فتح التسعير والمستحقات ←</a></p></div><div class="tile" id="invoicesTile" style="display:none"><strong>الفواتير والمطابقة</strong><span>إصدار الفواتير وربط التحصيلات</span><p><a href="./invoices.html">فتح الفواتير والمطابقة ←</a></p></div><div class="tile" id="balancesTile" style="display:none"><strong>أرصدة الطلاب والمدرسين</strong><span>تقرير مستحق ومدفوع ومتبقي لكل طرف</span><p><a href="./balances.html">فتح تقرير الأرصدة ←</a></p></div><div class="tile"><strong>التقارير وسجل العمليات</strong><span>تقارير الحصص والخدمات وسجل مراجعة للإدارة</span><p><a href="./reports.html">فتح التقارير وسجل العمليات ←</a></p></div>
+<div id="executiveTile" class="card" style="display:none;border-right:5px solid #13815e"><h2>لوحة المؤشرات التنفيذية</h2><p>مؤشرات الأداء والمالية، المواد والمدرسون الأكثر نشاطًا، والتنبيهات والطباعة بالعرض.</p><p><a href="./executive.html"><strong>فتح Executive Dashboard ←</strong></a></p></div><div class="card" id="usersTile" style="display:none;border-right:5px solid #13815e"><h2>إدارة المستخدمين والصلاحيات</h2><p>إضافة موظف وتحديد صلاحيات متعددة حسب مهامه.</p><p><a href="./users.html"><strong>فتح صفحة المستخدمين ←</strong></a></p></div><div class="grid">
+<div class="tile" id="peopleTile"><strong>الطلاب والمدرسون</strong><span>إدارة السجلات، البحث، والتعديل والأرشفة</span><p><a href="./people.html">فتح وحدة الطلاب والمدرسين ←</a></p></div>
+<div class="tile" id="operationsTile"><strong>الحصص والخدمات</strong><span>إضافة وتعديل وأرشفة الحصص والخدمات التعليمية</span><p><a href="./operations.html">فتح الحصص والخدمات ←</a></p></div>
+<div class="tile" id="financeTile" style="display:none"><strong>الحسابات المالية</strong><span>التحصيلات والمصروفات وصرف المدرسين</span><p><a href="./finance.html">فتح دفتر الحركات المالية ←</a></p></div><div class="tile" id="pricingTile" style="display:none"><strong>التسعير ومستحقات المدرسين</strong><span>أسعار الحصص والخدمات واحتساب مستحقات المدرسين</span><p><a href="./pricing.html">فتح التسعير والمستحقات ←</a></p></div><div class="tile" id="invoicesTile" style="display:none"><strong>الفواتير والمطابقة</strong><span>إصدار الفواتير وربط التحصيلات</span><p><a href="./invoices.html">فتح الفواتير والمطابقة ←</a></p></div><div class="tile" id="balancesTile" style="display:none"><strong>أرصدة الطلاب والمدرسين</strong><span>تقرير مستحق ومدفوع ومتبقي لكل طرف</span><p><a href="./balances.html">فتح تقرير الأرصدة ←</a></p></div><div class="tile" id="reportsTile"><strong>التقارير وسجل العمليات</strong><span>تقارير الحصص والخدمات وسجل مراجعة للإدارة</span><p><a href="./reports.html">فتح التقارير وسجل العمليات ←</a></p></div>
 </div>
 </main></div>
 <script type="module">
@@ -34,14 +34,19 @@ async function check(){
  try{
   const {data:{user},error}=await supabase.auth.getUser();if(error||!user)throw Error('no-session');
   const {data:profile,error:pe}=await supabase.from('staff_profiles').select('full_name,role,is_active').eq('user_id',user.id).single();
-  if(pe||!profile?.is_active||!labels[profile.role]){await supabase.auth.signOut();throw Error('unauthorized');}
+  if(pe||!profile?.is_active){await supabase.auth.signOut();throw Error('unauthorized');}
+  const {data:access,error:ae}=await supabase.from('user_permissions').select('permission');if(ae)throw Error('permissions');const rights=new Set((access||[]).map(x=>x.permission));const allowed=(permission)=>profile.role==='super_admin'||rights.has(permission);
   document.getElementById('greeting').textContent='مرحبًا، '+profile.full_name;
-  document.getElementById('role').textContent=labels[profile.role];
-  document.getElementById('financeTile').style.display=['accountant','admin','super_admin'].includes(profile.role)?'block':'none';
-  document.getElementById('executiveTile').style.display=['admin','super_admin'].includes(profile.role)?'block':'none';
-  document.getElementById('pricingTile').style.display=['accountant','admin','super_admin'].includes(profile.role)?'block':'none';
-  document.getElementById('invoicesTile').style.display=['accountant','admin','super_admin'].includes(profile.role)?'block':'none';
-  document.getElementById('balancesTile').style.display=['accountant','admin','super_admin'].includes(profile.role)?'block':'none';
+  document.getElementById('role').textContent=profile.role==='super_admin'?'مدير عام':'موظف بصلاحيات مخصصة';
+  document.getElementById('usersTile').style.display=profile.role==='super_admin'?'block':'none';
+  document.getElementById('peopleTile').style.display=['students.view','students.edit','teachers.view','teachers.edit'].some(allowed)?'block':'none';
+  document.getElementById('operationsTile').style.display=['lessons.view','lessons.edit','services.view','services.edit'].some(allowed)?'block':'none';
+  document.getElementById('reportsTile').style.display=['reports.view','audit.view'].some(allowed)?'block':'none';
+  document.getElementById('financeTile').style.display=(allowed('finance.view')||allowed('finance.edit'))?'block':'none';
+  document.getElementById('executiveTile').style.display=allowed('executive.view')?'block':'none';
+  document.getElementById('pricingTile').style.display=(allowed('pricing.view')||allowed('pricing.edit'))?'block':'none';
+  document.getElementById('invoicesTile').style.display=(allowed('invoices.view')||allowed('invoices.create')||allowed('invoices.allocate'))?'block':'none';
+  document.getElementById('balancesTile').style.display=(allowed('finance.view')||allowed('finance.edit'))?'block':'none';
   document.getElementById('email').textContent=user.email||'';
   state.hidden=true;app.style.display='block';
  }catch(e){location.replace('./login.html');}
