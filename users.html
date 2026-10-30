@@ -50,4 +50,4 @@ $('cancel').onclick=cancel;$('refresh').onclick=load;
 const{data:p,error:pe}=await sb.from('staff_profiles').select('role,is_active').eq('user_id',user.id).single();
 if(pe||p?.role!=='super_admin'||!p.is_active)throw Error('forbidden');
 permissionsUI();$('gate').remove();$('app').style.display='block';await load()}catch(e){location.replace('./dashboard.html')}})();
-</script></body></html>
+</script><script src="./table-enhancements.js" defer></script></body></html>
