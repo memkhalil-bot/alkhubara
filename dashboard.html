@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>لوحة الموظفين | مركز الخبراء التعليمي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{font-family:Cairo,Tahoma,Arial,sans-serif;color:#193a35;background:#f5f7f6}*{box-sizing:border-box}body{margin:0;min-height:100dvh}
+header{background:#123b38;color:white;padding:16px clamp(16px,4vw,36px);display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+h1{margin:0;font-size:clamp(18px,3vw,23px)}.sub{font-size:13px;color:#c1d8d0}
+main{max-width:1150px;margin:auto;padding:clamp(16px,4vw,30px)}.card{background:#fff;border:1px solid #dfeae5;border-radius:15px;padding:clamp(18px,3vw,26px);margin-bottom:16px}
+h2{margin:0 0 8px;font-size:20px}p{line-height:1.9;color:#526862}button{font:700 14px Cairo,Tahoma,Arial,sans-serif;border:1px solid #d7e4de;background:#fff;color:#17463c;border-radius:10px;padding:10px 17px;min-height:44px;cursor:pointer}
+#logout{background:#fff;color:#184b40}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.tile{background:#f6faf8;border:1px solid #d9e7df;border-radius:13px;padding:18px}.tile strong{display:block;font-size:17px}.tile span{display:block;font-size:13px;color:#617970;margin-top:8px}.pill{display:inline-block;background:#e5f3e9;color:#216044;border-radius:20px;padding:3px 12px;font-size:12px}
+#app{display:none}.notice{border-right:4px solid #d29c39;background:#fff8eb;padding:14px;border-radius:10px;color:#715321;margin:16px 0}#state{margin:15vh auto;text-align:center;padding:20px;max-width:460px}#state[hidden]{display:none}
+@media(max-width:720px){.grid{grid-template-columns:1fr 1fr}}@media(max-width:480px){.grid{grid-template-columns:1fr}header{align-items:flex-start}.card{padding:18px}}
+</style></head><body>
+<div id="state" role="status">جارٍ التحقق من جلسة الدخول...</div>
+<div id="app">
+<header><div><h1>🎓 مركز الخبراء التعليمي</h1><div class="sub">لوحة الموظفين — نسخة تجريبية آمنة للدخول</div></div><button id="logout">تسجيل الخروج</button></header>
+<main>
+<div class="card"><span class="pill" id="role">موظف</span><h2 id="greeting" style="margin-top:12px">مرحبًا</h2><p id="email"></p>
+<div class="notice">هذه معاينة لواجهة الحساب والصلاحيات فقط. إدارة الطلاب والحصص والمدفوعات غير مفعلة هنا حتى اكتمال نقل البيانات وتطبيق سياسات الحماية على جداولها.</div></div>
+<div class="grid">
+<div class="tile"><strong>الطلاب والمدرسون</strong><span>قيد ربط قاعدة البيانات</span></div>
+<div class="tile"><strong>الحصص والخدمات</strong><span>قيد ربط قاعدة البيانات</span></div>
+<div class="tile"><strong>التقارير وسجل العمليات</strong><span>قيد ربط الصلاحيات والسجلات</span></div>
+</div>
+</main></div>
+<script type="module">
+import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.0';
+const supabase=createClient('https://uqjoxgcddpwfbjanzqpy.supabase.co',"sb_publishable_-FhtYmDD0qO6mEB2nBE_rQ_j_SE_unY");
+const state=document.getElementById('state'),app=document.getElementById('app');
+const labels={super_admin:'مدير عام',admin:'مدير',accountant:'محاسب',secretary:'سكرتارية'};
+async function check(){
+ try{
+  const {data:{user},error}=await supabase.auth.getUser();if(error||!user)throw Error('no-session');
+  const {data:profile,error:pe}=await supabase.from('staff_profiles').select('full_name,role,is_active').eq('user_id',user.id).single();
+  if(pe||!profile?.is_active||!labels[profile.role]){await supabase.auth.signOut();throw Error('unauthorized');}
+  document.getElementById('greeting').textContent='مرحبًا، '+profile.full_name;
+  document.getElementById('role').textContent=labels[profile.role];
+  document.getElementById('email').textContent=user.email||'';
+  state.hidden=true;app.style.display='block';
+ }catch(e){location.replace('./login.html');}
+}
+document.getElementById('logout').addEventListener('click',async()=>{app.style.display='none';state.hidden=false;state.textContent='جارٍ تسجيل الخروج...';await supabase.auth.signOut();location.replace('./login.html');});
+check();
+</script></body></html>
