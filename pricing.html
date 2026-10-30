@@ -77,4 +77,4 @@ $('logout').addEventListener('click',async()=>{await supabase.auth.signOut();loc
  if(role!=='super_admin'&&!grant('pricing.edit')){$('permissions').textContent=' · صلاحية المحاسب: عرض فقط';$('studentRate').disabled=true;$('teacherRate').disabled=true;$('item').disabled=true}
  $('gate').hidden=true;$('app').style.display='block';await load()
  }catch(e){location.replace('./dashboard.html')}})();
-</script></body></html>
+</script><script src="./table-enhancements.js" defer></script></body></html>
