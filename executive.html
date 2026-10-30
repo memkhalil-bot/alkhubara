@@ -27,7 +27,8 @@ main{max-width:1440px;padding:13px 20px}.panel{padding:13px 15px;margin-bottom:1
 <div class="panel"><h2>حدود البيانات والتفسير</h2><p class="sub">المؤشرات التشغيلية وفق تاريخ الحصة أو الخدمة. المؤشرات المالية النقدية وفق تاريخ الحركة المالية. قيمة النشاط = أسعار الحصص والخدمات المكتملة والمتاحة، ولا تساوي بالضرورة قيمة الفواتير الصادرة. المديونية تقديرية من إجمالي النشاط المسعّر ناقص التحصيلات لنفس الطالب، ولا تحل محل المطابقة على مستوى الفاتورة. نصيب المركز هنا فرق سعر الحصص قبل المصروفات؛ لا يمثل صافي الربح. الأعداد الإجمالية للطلاب والمدرسين تشمل سجلات الأشخاص غير المؤرشفة بصرف النظر عن تاريخ إضافتها. اختلاف التاريخ الزمني للعملات والسجلات القديمة قد يؤثر على دقة المقارنة.</p></div>
 </main></div><script type="module">
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.0';
-const sb=createClient('https://uqjoxgcddpwfbjanzqpy.supabase.co',"sb_publishable_-FhtYmDD0qO6mEB2nBE_rQ_j_SE_unY");const $=id=>document.getElementById(id);
+const sb=createClient('https://uqjoxgcddpwfbjanzqpy.supabase.co',"sb_publishable_-FhtYmDD0qO6mEB2nBE_rQ_j_SE_unY");async function getGrants(client){const{data,error}=await client.from('user_permissions').select('permission');if(error)throw Error(error.message);const allowed=new Set((data||[]).map(x=>x.permission));return key=>allowed.has(key)}
+const $=id=>document.getElementById(id);
 const num=x=>Number(x||0),f=x=>num(x).toLocaleString('ar-QA',{maximumFractionDigits:2}),money=x=>f(x)+' ر.ق';
 const safe=(x)=>String(x||'—');const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Qatar',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 const datestring=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
@@ -160,5 +161,5 @@ async function refresh(){
  }catch(error){$('error').hidden=false;$('error').textContent='تعذّر حساب لوحة موثوقة: '+error.message;$('kpis').replaceChildren();state=null;$('export').disabled=true}
  finally{$('refresh').disabled=false}}
 $('period').onchange=periodChanged;$('from').onchange=()=>{$('period').value='custom'};$('to').onchange=()=>{$('period').value='custom'};$('refresh').onclick=refresh;$('export').onclick=csv;$('print').onclick=()=>window.print();$('logout').onclick=async()=>{await sb.auth.signOut();location.replace('./login.html')};
-(async()=>{try{const{data:{user},error}=await sb.auth.getUser();if(error||!user)throw Error('login');const{data:p,error:pe}=await sb.from('staff_profiles').select('role,is_active').eq('user_id',user.id).single();if(pe||!p?.is_active||!['admin','super_admin'].includes(p.role))throw Error('role');periodChanged();$('gate').remove();$('app').style.display='block';await refresh()}catch(e){location.replace('./dashboard.html')}})();
+(async()=>{try{const{data:{user},error}=await sb.auth.getUser();if(error||!user)throw Error('login');const{data:p,error:pe}=await sb.from('staff_profiles').select('role,is_active').eq('user_id',user.id).single();if(pe||!p?.is_active)throw Error('role');const grant=await getGrants(sb);if(p.role!=='super_admin'&&!grant('executive.view'))throw Error('role');periodChanged();$('gate').remove();$('app').style.display='block';await refresh()}catch(e){location.replace('./dashboard.html')}})();
 </script></body></html>
