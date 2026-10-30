@@ -100,12 +100,14 @@ async function refresh(){
  {label:'الخدمات التعليمية',value:f(ss.length)},
  {label:'قيمة النشاط المكتمل المسعّر',value:money(earned),note:'تقديري · ليس فواتير'},
  {label:'التحصيلات الصافية للفترة',value:money(receipts)},
+ {label:'معدل التحصيل المقارن للنشاط',value:earned>0?f(receipts/earned*100)+'%':'—',note:'مؤشر تقريبي وليس مطابقة فواتير'},
  {label:'إجمالي أرصدة الطلاب التقديرية',value:money(debts.reduce((a,x)=>a+x.balance,0))},
  {label:'عدد الطلاب ذوي الرصيد',value:f(debts.length)},
  {label:'مصروفات المركز',value:money(expenses)},
  {label:'مستحقات المدرسين للحصص',value:money(teacherEarned),note:'المكتملة المسعّرة'},
  {label:'المدفوع للمدرسين',value:money(teacherPaid)},
- {label:'فرق حصص المركز',value:money(earned-teacherEarned),note:'قبل المصروفات'},
+ {label:'فرق قيمة النشاط ومستحق المدرسين',value:money(earned-teacherEarned),note:'قبل المصروفات ولا يمثل الربح'},
+ {label:'نسبة مستحق المدرسين من النشاط',value:earned>0?f(teacherEarned/earned*100)+'%':'—',note:'تشمل قيمة الخدمات في مقام النسبة'},
  {label:'نسبة إلغاء الحصص',value:ls.length?f(100*ls.filter(l=>l.status==='cancelled').length/ls.length)+'%':'—'},
  {label:'متوسط ساعات الحصة المكتملة',value:complete.length?f(complete.reduce((a,l)=>a+num(l.hours),0)/complete.length):'—'}
  ]);
