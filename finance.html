@@ -104,4 +104,4 @@ $('logout').addEventListener('click',async()=>{await supabase.auth.signOut();loc
  $('who').textContent=(profile.full_name||user.email)+' · '+(roleLabels[profile.role]||'موظف مالي');$('form').hidden=profile.role!=='super_admin'&&!grant('finance.edit');
  $('state').hidden=true;$('app').style.display='block';$('entry_date').value=new Date().toLocaleDateString('en-CA');setType();await loadPeople();await load();
  }catch(e){location.replace('./dashboard.html')}})();
-</script></body></html>
+</script><script src="./table-enhancements.js" defer></script></body></html>
