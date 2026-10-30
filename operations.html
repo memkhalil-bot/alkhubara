@@ -63,7 +63,7 @@ const roleLabels={secretary:'سكرتارية',accountant:'محاسب',admin:'م
 const statusLabels={scheduled:'مجدولة',confirmed:'مؤكدة',completed:'تمت',cancelled:'ملغاة',new:'جديد',in_progress:'جارٍ التنفيذ'};
 const paymentLabels={unpaid:'غير مدفوع',partial:'جزئيًا',paid:'مدفوع'};
 const serviceLabels={homework:'واجب',research:'بحث',project:'مشروع',other:'أخرى'};
-let kind='lessons',uid='',canEdit=false,records=[],checkGrant=null,students=[],teachers=[],editing=null;
+let role='',kind='lessons',uid='',canEdit=false,records=[],checkGrant=null,students=[],teachers=[],editing=null;
 function note(s,error=false){$('status').textContent=s;$('status').className=error?'error':'ok'}
 function option(select,items){select.replaceChildren();const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='اختر...';select.append(placeholder);for(const item of items){const o=document.createElement('option');o.value=item.id;o.textContent=item.full_name;select.append(o)}}
 function nameOf(items,id){return items.find(x=>x.id===id)?.full_name||'—'}
@@ -127,7 +127,7 @@ $('search').addEventListener('input',render);$('dateFilter').addEventListener('c
 document.querySelectorAll('[data-kind]').forEach(b=>b.addEventListener('click',()=>{kind=b.dataset.kind;document.querySelectorAll('[data-kind]').forEach(el=>{el.classList.toggle('active',el===b);el.setAttribute('aria-selected',String(el===b))});$('search').value='';$('dateFilter').value='';$('archived').checked=false;clearForm();load()}));
 $('logout').addEventListener('click',async()=>{await supabase.auth.signOut();location.replace('./login.html')});
 (async()=>{try{const {data:{user},error}=await supabase.auth.getUser();if(error||!user)throw Error('no-user');uid=user.id;
-const {data:p,error:pe}=await supabase.from('staff_profiles').select('full_name,role,is_active').eq('user_id',uid).single();if(pe||!p?.is_active)throw Error('not-authorized');checkGrant=await getGrants(supabase);canEdit=p.role==='super_admin'||checkGrant('lessons.edit')||checkGrant('services.edit');
+const {data:p,error:pe}=await supabase.from('staff_profiles').select('full_name,role,is_active').eq('user_id',uid).single();if(pe||!p?.is_active)throw Error('not-authorized');role=p.role;checkGrant=await getGrants(supabase);canEdit=p.role==='super_admin'||checkGrant('lessons.edit')||checkGrant('services.edit');
 $('who').textContent=(p.full_name||user.email)+' · '+(roleLabels[p.role]||'موظف بصلاحيات مخصصة');$('editor').hidden=!canEdit;$('readonly').hidden=canEdit;
 $('state').hidden=true;$('app').style.display='block';clearForm();await loadPeople();await load()}catch(e){location.replace('./login.html')}})();
 </script></body></html>
