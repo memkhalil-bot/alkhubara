@@ -162,4 +162,4 @@ async function refresh(){
  finally{$('refresh').disabled=false}}
 $('period').onchange=periodChanged;$('from').onchange=()=>{$('period').value='custom'};$('to').onchange=()=>{$('period').value='custom'};$('refresh').onclick=refresh;$('export').onclick=csv;$('print').onclick=()=>window.print();$('logout').onclick=async()=>{await sb.auth.signOut();location.replace('./login.html')};
 (async()=>{try{const{data:{user},error}=await sb.auth.getUser();if(error||!user)throw Error('login');const{data:p,error:pe}=await sb.from('staff_profiles').select('role,is_active').eq('user_id',user.id).single();if(pe||!p?.is_active)throw Error('role');const grant=await getGrants(sb);if(p.role!=='super_admin'&&!grant('executive.view'))throw Error('role');periodChanged();$('gate').remove();$('app').style.display='block';await refresh()}catch(e){location.replace('./dashboard.html')}})();
-</script></body></html>
+</script><script src="./table-enhancements.js" defer></script></body></html>
