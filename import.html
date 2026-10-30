@@ -2,9 +2,12 @@
 <style>:root{font-family:Cairo,Tahoma,Arial,sans-serif;background:#f5f7f6;color:#19392f}*{box-sizing:border-box}body{margin:0}header{background:#123b38;color:#fff;padding:16px clamp(12px,3vw,35px);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}h1{margin:0;font-size:22px}main{max-width:1150px;margin:auto;padding:16px}.panel{background:white;border:1px solid #dce8df;padding:18px;border-radius:12px;margin-bottom:14px}.note{background:#fff8e9;border-right:4px solid #d2a046;padding:12px;font-size:13px;line-height:1.9;margin-bottom:13px}h2{font-size:18px}button{font:700 13px Cairo,Tahoma,Arial,sans-serif;cursor:pointer;background:#12604d;color:white;border:0;border-radius:9px;padding:10px 16px;min-height:44px}button.secondary{background:#e8f2ed;color:#174e3c}button:disabled{opacity:.5;cursor:not-allowed}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.wrap{overflow-x:auto}table{width:100%;min-width:700px;border-collapse:collapse}td,th{padding:10px;text-align:right;border-bottom:1px solid #e5ece6;font-size:12px}th{background:#f1f7f2}input,select{font:inherit;border-radius:8px;border:1px solid #c6d8cf;padding:9px;min-height:44px}.muted{font-size:13px;color:#627a6a;line-height:1.8}#app{display:none}#gate{text-align:center;margin:15vh auto}#status{white-space:pre-line;font-size:13px;line-height:1.8}.error{color:#af2929}a{color:inherit}@media(max-width:500px){main{padding:10px}.panel{padding:12px}}</style></head><body>
 <p id="gate">جارٍ التحقق من صلاحيات استيراد البيانات...</p><div id="app"><header><h1>استيراد البيانات القديمة من Excel</h1><a href="./people.html"><button class="secondary">الطلاب والمدرسون</button></a></header><main>
 <div class="note">ابدأ بالقالب المنظم. أسماء الشيتات المطلوبة: Students وTeachers وSubjects. كل طالب أو مدرس سطر واحد، واكتب المواد في عمود subjects مفصولة بعلامة |. سيولد النظام كودًا تلقائيًا لكل سجل. ننصح بأخذ نسخة احتياطية قبل الاستيراد، ومراجعة ملفك لتجنب التكرار.</div>
-<div class="panel"><h2>1. اختيار الملف ومراجعته</h2><div class="row"><input id="file" type="file" accept=".xlsx,.xls" aria-label="ملف Excel"><button id="preview">معاينة الملف</button><button class="secondary" id="clear">مسح المعاينة</button></div><p class="muted">بإمكانك استخدام <a href="https://alkhubara-git-feature-supabase-auth-responsive-mohkhalil.vercel.app/import.html">هذه الصفحة</a> بعد إعداد ملفك. القالب الجاهز متاح في المحادثة أيضًا.</p>
+<div class="panel"><h2>1. تنزيل قالب Excel</h2>
+<div class="row"><button id="downloadTemplate" type="button">⬇ تنزيل قالب Excel الفارغ</button><span class="muted">يتضمن Students وTeachers وSubjects مع الأعمدة المطلوبة وتعليمات الاستخدام.</span></div>
+<p class="muted">نزّل النسخة، أدخل بياناتك في الصفوف التالية للعناوين، واحفظ الملف بصيغة XLSX. لا تغيّر أسماء الشيتات أو رؤوس الأعمدة. يمكن ترك شيت غير مستخدم فارغًا.</p></div>
+<div class="panel"><h2>2. اختيار الملف ومراجعته</h2><div class="row"><input id="file" type="file" accept=".xlsx,.xls" aria-label="ملف Excel"><button id="preview">معاينة الملف</button><button class="secondary" id="clear">مسح المعاينة</button></div><p class="muted">بعد ملء القالب وحفظه، اختره هنا واضغط «معاينة الملف» قبل اعتماد أي بيانات.</p>
 <p id="status" role="status"></p><div id="counts" class="muted"></div><div class="wrap"><table><thead><tr><th>الشيت</th><th>الصف</th><th>الاسم</th><th>المواد</th><th>نتيجة الفحص</th></tr></thead><tbody id="rows"></tbody></table></div></div>
-<div class="panel"><h2>2. اعتماد الاستيراد</h2><p class="muted">لن يتم حفظ أي بيانات قبل الضغط على اعتماد الاستيراد. يتم التحقق من الأسماء والإيميلات والهواتف والتكرارات داخل الملف ومقارنتها بالسجلات الحالية. عند فشل أي صف أثناء الحفظ سيظهر خطأ واضح؛ الاستيراد ليس معاملة واحدة شاملة، وقد يتطلب استكمال الصفوف التي فشلت دون إعادة الصفوف الناجحة.</p>
+<div class="panel"><h2>3. اعتماد الاستيراد</h2><p class="muted">لن يتم حفظ أي بيانات قبل الضغط على اعتماد الاستيراد. يتم التحقق من الأسماء والإيميلات والهواتف والتكرارات داخل الملف ومقارنتها بالسجلات الحالية. عند فشل أي صف أثناء الحفظ سيظهر خطأ واضح؛ الاستيراد ليس معاملة واحدة شاملة، وقد يتطلب استكمال الصفوف التي فشلت دون إعادة الصفوف الناجحة.</p>
 <button id="import" disabled>اعتماد استيراد البيانات</button><p id="result" role="status" class="muted"></p></div></main></div>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script type="module">
@@ -51,6 +54,37 @@ async function scan(){
  previewValid=problematic.length===0 && result.some(x=>x.sheet==='Students'||x.sheet==='Teachers');$('import').disabled=!previewValid;show();
  setStatus(problematic.length?'يوجد '+problematic.length+' صف يحتاج تصحيحًا قبل الحفظ':'المعاينة ناجحة. يمكنك اعتماد الاستيراد.');
 }
+function downloadTemplate(){
+ if(!window.XLSX){setStatus('تعذر تحميل مكتبة Excel. تحقق من الإنترنت وأعد المحاولة.',true);return}
+ const book=XLSX.utils.book_new();
+ const tables=[
+  {name:'Students',headers:['full_name','phone','email','university','faculty','specialization','subjects'],widths:[34,19,30,28,26,25,48]},
+  {name:'Teachers',headers:['full_name','phone','email','subjects'],widths:[34,19,30,48]},
+  {name:'Subjects',headers:['subject_name'],widths:[43]}
+ ];
+ for(const t of tables){
+  const sheet=XLSX.utils.aoa_to_sheet([t.headers]);
+  sheet['!cols']=t.widths.map(w=>({wch:w}));
+  sheet['!autofilter']={ref:'A1:'+XLSX.utils.encode_col(t.headers.length-1)+'1'};
+  XLSX.utils.book_append_sheet(book,sheet,t.name)
+ }
+ const notes=[
+ ['دليل استيراد مركز الخبراء',''],
+ ['1','اكتب طالبًا واحدًا في كل صف من Students، ومدرسًا واحدًا في كل صف من Teachers.'],
+ ['2','لا تغير أسماء الأوراق: Students / Teachers / Subjects ولا أسماء الأعمدة الإنجليزية.'],
+ ['3','عمود full_name مطلوب. باقي البيانات اختيارية ويمكن تركها فارغة.'],
+ ['4','إذا كان للشخص أكثر من مادة، اكتبها في subjects باستخدام | مثل: رياضيات | فيزياء.'],
+ ['5','يمكن كتابة أسماء المواد في Subjects أيضًا؛ النظام ينشئ قائمة المواد أثناء الاستيراد.'],
+ ['6','لا تكتب أكواد الطلاب والمدرسين: الأكواد تصدر تلقائيًا من النظام.'],
+ ['7','احفظ الملف بصيغة xlsx ثم ارفعه واضغط معاينة؛ أصلح أي أخطاء قبل الاستيراد.'],
+ ['8','تأكد من عدم تكرار الأسماء/الإيميلات/أرقام الهواتف، وخذ نسخة احتياطية قبل الاستيراد.'],
+ ['9','لا تضف بيانات تجريبية إلى نفس الملف الذي ستعتمده للاستيراد.']
+ ];
+ const guide=XLSX.utils.aoa_to_sheet(notes);guide['!cols']=[{wch:33},{wch:105}];XLSX.utils.book_append_sheet(book,guide,'Instructions');
+ XLSX.writeFile(book,'AlKhubara_Import_Template.xlsx',{bookType:'xlsx',compression:true});
+ setStatus('تم تجهيز قالب Excel الفارغ للتنزيل.');
+}
+$('downloadTemplate').addEventListener('click',downloadTemplate);
 $('preview').onclick=async()=>{try{setStatus('جارٍ فحص الملف...');await scan()}catch(e){setStatus(e.message,true);$('import').disabled=true}};
 $('clear').onclick=()=>{entries=[];previewValid=false;$('file').value='';$('rows').replaceChildren();$('counts').textContent='';setStatus('');$('import').disabled=true};
 $('import').onclick=async()=>{
