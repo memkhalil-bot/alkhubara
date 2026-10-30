@@ -44,7 +44,7 @@ $('save').disabled=true;msg('جارٍ حفظ البيانات...');
 try{if(editing){const {data,error}=await sb.rpc('manage_staff_permissions',{target_user:editing,new_permissions:perms,new_full_name:name,enabled:$('active').value==='true'});if(error)throw Error(error.message);msg('تم تحديث الصلاحيات والحالة')}
 else{const {data:{session},error:se}=await sb.auth.getSession();if(se||!session)throw Error('أعد تسجيل الدخول');
 const res=await fetch('https://uqjoxgcddpwfbjanzqpy.supabase.co/functions/v1/staff-create',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token,'apikey':"sb_publishable_-FhtYmDD0qO6mEB2nBE_rQ_j_SE_unY"},body:JSON.stringify({full_name:name,email:mail,password:$('password').value,permissions:perms})});const body=await res.json();if(!res.ok)throw Error(body.error||'تعذر إنشاء الحساب');msg('تم إنشاء حساب '+mail)}
-cancel();await load()}catch(e){msg('فشل حفظ المستخدم: '+e.message,true)}finally{$('save').disabled=false}};
+const success=editing?'تم تحديث بيانات الموظف وصلاحياته':'تم إنشاء المستخدم '+mail+' بنجاح';cancel();msg(success);await load()}catch(e){msg('فشل حفظ المستخدم: '+e.message,true)}finally{$('save').disabled=false}};
 $('cancel').onclick=cancel;$('refresh').onclick=load;
 (async()=>{try{const{data:{user},error}=await sb.auth.getUser();if(error||!user)throw Error('login');authUser=user;
 const{data:p,error:pe}=await sb.from('staff_profiles').select('role,is_active').eq('user_id',user.id).single();
