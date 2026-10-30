@@ -102,12 +102,20 @@ async function loadCredits(){
  const receipts=new Set(e.data.filter(x=>x.entry_type==='receipt'&&!reversed.has(x.id)).map(x=>x.id));
  const paid=new Map();for(const x of a.data)if(receipts.has(x.receipt_id))paid.set(x.invoice_id,(paid.get(x.invoice_id)||0)+Number(x.amount));
  const rows=i.data.map(inv=>{const src=inv.lesson_id?lessonMap.get(inv.lesson_id):serviceMap.get(inv.service_id);return src?{inv,src,balance:Math.max(0,Number(inv.amount)-(paid.get(inv.id)||0))}:null}).filter(Boolean);
- $('creditCount').textContent=rows.length+' فاتورة آجلة';const body=$('creditRows');body.replaceChildren();
+ const invoicedLessons=new Set(i.data.map(x=>x.lesson_id).filter(Boolean)),invoicedServices=new Set(i.data.map(x=>x.service_id).filter(Boolean));
+ const unbilled=[
+ ...[...lessonMap.values()].filter(x=>!invoicedLessons.has(x.id)).map(src=>({src,kind:'حصة'})),
+ ...[...serviceMap.values()].filter(x=>!invoicedServices.has(x.id)).map(src=>({src,kind:'خدمة'}))
+ ];
+ $('creditCount').textContent=rows.length+' فاتورة آجلة · '+unbilled.length+' بانتظار الفوترة';const body=$('creditRows');body.replaceChildren();
  for(const {inv,src,balance} of rows){const tr=document.createElement('tr');const name=students.find(x=>x.id===inv.student_id)?.full_name||'—';
  const paidAmount=paid.get(inv.id)||0;const due=src.due_date||'—';
  const state=balance<=0?'محصل':paidAmount>0?'محصل جزئيًا':(due!=='—'&&due<new Date().toISOString().slice(0,10)?'متأخر':'آجل');
  for(const value of [name,src.subject||src.description,inv.invoice_no,due,money(inv.amount),money(paidAmount),money(balance),state])cell(tr,value);body.append(tr)}
- if(!rows.length){const tr=document.createElement('tr');const td=cell(tr,'لا توجد مستحقات آجلة مفوترة');td.colSpan=8;body.append(tr)}
+ for(const {src,kind} of unbilled){const tr=document.createElement('tr');const name=students.find(x=>x.id===src.student_id)?.full_name||'—';
+ for(const value of [name,kind+' — '+(src.subject||src.description||'—'),'لم تُصدر',src.due_date||'—','لم يُسعَّر بعد','—','—','بانتظار الفوترة'])cell(tr,value);
+ body.append(tr)}
+ if(!rows.length&&!unbilled.length){const tr=document.createElement('tr');const td=cell(tr,'لا توجد مستحقات آجلة');td.colSpan=8;body.append(tr)}
 }
 
 const labels={receipt:'تحصيل',expense:'مصروف',teacher_payment:'صرف مدرس',reversal:'قيد عكسي'};
