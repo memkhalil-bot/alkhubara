@@ -1,0 +1,106 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الحسابات المالية | مركز الخبراء التعليمي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{font-family:Cairo,Tahoma,Arial,sans-serif;color:#18372f;background:#f5f7f6}*{box-sizing:border-box}body{margin:0;min-height:100dvh}
+header{background:#123b38;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:16px clamp(14px,3vw,34px)}
+h1{margin:0;font-size:clamp(18px,3vw,24px)}header small{color:#cce1d8}main{max-width:1200px;margin:auto;padding:clamp(12px,3vw,28px)}
+.panel{border:1px solid #dce7df;border-radius:15px;padding:clamp(16px,3vw,24px);background:#fff;margin-bottom:16px}
+h2{font-size:20px;margin:0 0 7px}.muted{font-size:13px;color:#62786c;line-height:1.8}
+.notice{border-right:4px solid #ce9b38;background:#fff8e9;border-radius:9px;padding:12px 15px;font-size:13px;color:#6b501c;line-height:1.8;margin-bottom:15px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.stat{background:#f0f7f2;border-radius:13px;padding:15px}.stat span{display:block;font-size:13px;color:#4e6d5b}.stat strong{display:block;font-size:clamp(19px,3vw,26px);margin-top:8px}
+.fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}label{display:block;font-weight:700;font-size:13px;margin-bottom:6px}
+input,select,textarea{font:inherit;font-size:16px;color:#19382e;min-height:46px;padding:10px;border:1px solid #c6d8cc;border-radius:9px;width:100%;background:#fff}
+input:focus,select:focus{outline:3px solid #cdeedb;border-color:#12604d}
+button{cursor:pointer;min-height:44px;padding:10px 16px;border:0;border-radius:9px;background:#12604d;color:#fff;font:700 14px Cairo,Tahoma,Arial,sans-serif}
+button.secondary{background:#e8f2eb;color:#1a5140}button:disabled{opacity:.55;cursor:not-allowed}.row,.toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.toolbar{justify-content:flex-start}
+.full{grid-column:1/-1}.tablewrap{overflow-x:auto}table{width:100%;min-width:790px;border-collapse:collapse}th,td{text-align:right;padding:11px;border-bottom:1px solid #e5eee8;font-size:13px}th{background:#f3f8f4}#app{display:none}#state{text-align:center;margin:15vh auto;max-width:480px}#message{min-height:24px;font-size:14px;margin:10px 0}.error{color:#b12626}.ok{color:#12654a}.negative{color:#a3332c}.pill{background:#e7f2e8;color:#225e3f;border-radius:20px;padding:3px 9px;font-size:12px}
+@media(max-width:880px){.fields{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.fields,.grid{grid-template-columns:1fr}header{align-items:flex-start}main{padding:12px}}
+</style></head><body>
+<div id="state" role="status">جارٍ التحقق من صلاحيات الحسابات المالية...</div>
+<div id="app"><header><div><h1>💳 الحسابات المالية</h1><small>مركز الخبراء التعليمي · الوصول المصرّح به فقط</small></div>
+<div class="toolbar"><a href="./dashboard.html"><button type="button" class="secondary">لوحة التحكم</button></a><button type="button" class="secondary" id="logout">تسجيل الخروج</button></div></header>
+<main>
+<div class="notice">نسخة تشغيل تجريبية مرتبطة بقاعدة البيانات. لا تستخدمها للقيود المالية الحقيقية قبل مراجعة وتدقيق إجراءات الحسابات. لا يُسمح بحذف أو تعديل القيود بعد تسجيلها؛ التصحيح يتم بقيد عكسي.</div>
+<div class="panel"><div class="row"><div><h2>ملخص الحركات المسجلة</h2><p id="who" class="muted"></p></div><span class="pill">العملة: ريال قطري</span></div>
+<div class="grid"><div class="stat"><span>التحصيلات (الصافي)</span><strong id="receipts">—</strong></div>
+<div class="stat"><span>المصروفات (الصافي)</span><strong id="expenses">—</strong></div><div class="stat"><span>صرف مستحقات المدرسين (الصافي)</span><strong id="teachersPaid">—</strong></div></div>
+<p class="muted">الأرقام تلخّص القيود المعروضة فقط (بحد أقصى 500 قيد)، وليست أرصدة دفتر أستاذ معتمدة أو حسابًا لمستحقات المدرسين غير المصروفة.</p></div>
+<div class="panel"><h2>إضافة حركة مالية</h2><form id="form" class="fields">
+<div><label for="entry_type">نوع الحركة</label><select id="entry_type"><option value="receipt">تحصيل من طالب</option><option value="expense">مصروف مركز</option><option value="teacher_payment">صرف مستحق مدرس</option></select></div>
+<div><label for="entry_date">التاريخ</label><input type="date" id="entry_date" required></div>
+<div><label for="amount">المبلغ (ر.ق)</label><input type="number" id="amount" min="0.01" max="100000000" step="0.01" required></div>
+<div id="studentField"><label for="student_id">الطالب</label><select id="student_id"></select></div>
+<div id="teacherField" hidden><label for="teacher_id">المدرس</label><select id="teacher_id"></select></div>
+<div><label for="category">البند / التصنيف</label><input id="category" maxlength="120" minlength="2" required placeholder="مثال: رسوم حصة"></div>
+<div><label for="payment_method">وسيلة الدفع</label><select id="payment_method"><option value="cash">نقدًا</option><option value="card">بطاقة</option><option value="bank">تحويل بنكي</option><option value="other">أخرى</option></select></div>
+<div><label for="reference_number">رقم المرجع</label><input id="reference_number" maxlength="100"></div>
+<div class="full"><label for="description">التفاصيل</label><input id="description" maxlength="1000"></div>
+<div class="full"><button type="submit" id="save">حفظ القيد المالي</button></div></form>
+<div id="message" aria-live="polite" role="status"></div></div>
+<div class="panel"><div class="row"><div><h2>دفتر الحركات</h2><p id="count" class="muted">—</p></div><button type="button" class="secondary" id="reload">تحديث</button></div><div class="tablewrap"><table><thead><tr><th>التاريخ</th><th>النوع</th><th>الطرف</th><th>البند</th><th>المبلغ (ر.ق)</th><th>المرجع</th><th>الإجراء</th></tr></thead><tbody id="rows"></tbody></table></div></div>
+</main></div>
+<script type="module">
+import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.0';
+const supabase=createClient('https://uqjoxgcddpwfbjanzqpy.supabase.co',"sb_publishable_-FhtYmDD0qO6mEB2nBE_rQ_j_SE_unY");
+const $=id=>document.getElementById(id);let uid='',students=[],teachers=[],entries=[];
+const labels={receipt:'تحصيل',expense:'مصروف',teacher_payment:'صرف مدرس',reversal:'قيد عكسي'};
+const roleLabels={accountant:'محاسب',admin:'مدير',super_admin:'مدير عام'};
+const money=v=>Number(v||0).toLocaleString('ar-QA',{minimumFractionDigits:2,maximumFractionDigits:2});
+function msg(t,bad=false){$('message').textContent=t;$('message').className=bad?'error':'ok'}
+function cell(tr,v){const td=document.createElement('td');td.textContent=v==null?'—':String(v);tr.append(td);return td}
+function fill(select,items){select.replaceChildren();const empty=document.createElement('option');empty.value='';empty.textContent='اختر...';select.append(empty);for(const item of items){const op=document.createElement('option');op.value=item.id;op.textContent=item.full_name;select.append(op)}}
+function setType(){const type=$('entry_type').value;$('studentField').hidden=type!=='receipt';$('teacherField').hidden=type!=='teacher_payment';$('student_id').required=type==='receipt';$('teacher_id').required=type==='teacher_payment'}
+function person(items,id){return items.find(x=>x.id===id)?.full_name||'—'}
+async function loadPeople(){
+ const [s,t]=await Promise.all([supabase.from('students').select('id,full_name').eq('is_archived',false).limit(1000).order('full_name'),supabase.from('teachers').select('id,full_name').eq('is_archived',false).limit(1000).order('full_name')]);
+ if(s.error||t.error){msg('تعذر تحميل الأطراف: '+(s.error||t.error).message,true);return}
+ students=s.data||[];teachers=t.data||[];fill($('student_id'),students);fill($('teacher_id'),teachers);
+}
+async function load(){
+ const {data,error}=await supabase.from('financial_entries').select('id,entry_date,entry_type,student_id,teacher_id,amount,category,description,reference_number,reverses_entry_id,created_at').order('created_at',{ascending:false}).limit(500);
+ if(error){msg('فشل تحميل الحركات: '+error.message,true);return}
+ entries=data||[];$('rows').replaceChildren();$('count').textContent=entries.length+' قيد معروض (حد أقصى 500)';
+ const reversed=new Set(entries.filter(e=>e.entry_type==='reversal'&&e.reverses_entry_id).map(e=>e.reverses_entry_id));
+ const totals={receipt:0,expense:0,teacher_payment:0};
+ for(const entry of entries){
+  if(entry.entry_type==='reversal')continue;
+  if(totals[entry.entry_type]===undefined)continue;
+  if(reversed.has(entry.id))continue;totals[entry.entry_type]+=Number(entry.amount);
+ }
+ $('receipts').textContent=money(totals.receipt);$('expenses').textContent=money(totals.expense);$('teachersPaid').textContent=money(totals.teacher_payment);
+ if(!entries.length){const tr=document.createElement('tr');const td=cell(tr,'لا توجد حركات مالية بعد');td.colSpan=7;$('rows').append(tr)}
+ for(const e of entries){const tr=document.createElement('tr');cell(tr,e.entry_date);cell(tr,labels[e.entry_type]||e.entry_type);cell(tr,e.entry_type==='receipt'?person(students,e.student_id):e.entry_type==='teacher_payment'?person(teachers,e.teacher_id):'—');cell(tr,e.category);cell(tr,(e.entry_type==='reversal'?'-':'')+money(e.amount));cell(tr,e.reference_number);
+  const td=document.createElement('td');if(e.entry_type!=='reversal'&&!reversed.has(e.id)){
+   const b=document.createElement('button');b.type='button';b.className='secondary';b.textContent='عكس القيد';b.addEventListener('click',()=>reverse(e,b));td.append(b)
+  }else td.textContent=e.entry_type==='reversal'?'تصحيح':'معكوس';tr.append(td);$('rows').append(tr)}
+}
+async function reverse(entry,button){
+ if(!confirm('تأكيد إنشاء قيد عكسي للمبلغ '+money(entry.amount)+' ر.ق؟ لن يُحذف القيد الأصلي.'))return;
+ button.disabled=true;
+ const payload={entry_date:new Date().toLocaleDateString('en-CA'),entry_type:'reversal',amount:entry.amount,category:'عكس: '+entry.category,description:'قيد تصحيح للقيد '+entry.id,reference_number:entry.reference_number,reverses_entry_id:entry.id,created_by:uid};
+ const {error}=await supabase.from('financial_entries').insert(payload);
+ if(error)msg('تعذر عكس القيد: '+error.message,true);else{msg('تم إنشاء القيد العكسي');await load()}button.disabled=false;
+}
+$('entry_type').addEventListener('change',setType);
+$('form').addEventListener('submit',async ev=>{
+ ev.preventDefault();const type=$('entry_type').value;
+ const amount=Number($('amount').value);
+ if(!Number.isFinite(amount)||amount<=0){msg('المبلغ غير صالح',true);return}
+ const payload={entry_date:$('entry_date').value,entry_type:type,amount,category:$('category').value.trim(),description:$('description').value.trim()||null,reference_number:$('reference_number').value.trim()||null,payment_method:$('payment_method').value,student_id:type==='receipt'?$('student_id').value:null,teacher_id:type==='teacher_payment'?$('teacher_id').value:null,created_by:uid};
+ if((type==='receipt'&&!payload.student_id)||(type==='teacher_payment'&&!payload.teacher_id)){msg('اختر الطرف المرتبط بالقيد',true);return}
+ $('save').disabled=true;const {error}=await supabase.from('financial_entries').insert(payload);$('save').disabled=false;
+ if(error){msg('فشل حفظ القيد: '+error.message,true);return}
+ $('form').reset();$('entry_date').value=new Date().toLocaleDateString('en-CA');setType();msg('تم تسجيل الحركة بنجاح');await load();
+});
+$('reload').addEventListener('click',async()=>{await loadPeople();await load()});
+$('logout').addEventListener('click',async()=>{await supabase.auth.signOut();location.replace('./login.html')});
+(async()=>{try{
+ const {data:{user},error}=await supabase.auth.getUser();if(error||!user)throw Error('no-session');uid=user.id;
+ const {data:profile,error:pe}=await supabase.from('staff_profiles').select('full_name,role,is_active').eq('user_id',uid).single();
+ if(pe||!profile?.is_active||!roleLabels[profile.role])throw Error('unauthorized');
+ $('who').textContent=(profile.full_name||user.email)+' · '+roleLabels[profile.role];
+ $('state').hidden=true;$('app').style.display='block';$('entry_date').value=new Date().toLocaleDateString('en-CA');setType();await loadPeople();await load();
+ }catch(e){location.replace('./dashboard.html')}})();
+</script></body></html>
