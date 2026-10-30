@@ -36,11 +36,13 @@ input:focus{outline:3px solid #d4eee0;border-color:#12604d}.fields{display:grid;
 <script type="module">
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.0';
 const supabase=createClient('https://uqjoxgcddpwfbjanzqpy.supabase.co',"sb_publishable_-FhtYmDD0qO6mEB2nBE_rQ_j_SE_unY");
-const $=id=>document.getElementById(id);let kind='students',records=[],role='',uid='',editing=null,canEdit=false;
+async function getGrants(client){const{data,error}=await client.from('user_permissions').select('permission');if(error)throw Error(error.message);const allowed=new Set((data||[]).map(x=>x.permission));return key=>allowed.has(key)}
+const $=id=>document.getElementById(id);let kind='students',records=[],role='',uid='',editing=null,canEdit=false,checkGrant=null;
 function status(t,error=false){$('status').textContent=t;$('status').className=error?'error':'ok'}
 function cell(row,value){const td=document.createElement('td');td.textContent=value??'—';row.append(td);return td}
 function reset(){editing=null;$('form').reset();$('editorTitle').textContent=kind==='students'?'إضافة طالب':'إضافة مدرس';$('save').textContent='حفظ السجل';$('cancel').hidden=true}
 async function load(){
+ const view=kind==='students'?'students.view':'teachers.view',edit=kind==='students'?'students.edit':'teachers.edit';canEdit=role==='super_admin'||checkGrant(edit);$('editor').hidden=!canEdit;$('readOnly').hidden=canEdit;if(role!=='super_admin'&&!canEdit&&!checkGrant(view)){status('ليس لديك صلاحية لعرض هذا القسم',true);$('rows').replaceChildren();return;}
  $('rows').replaceChildren();$('count').textContent='جارٍ التحميل...';const {data,error}=await supabase.from(kind).select('id,full_name,phone,email,is_archived,updated_at').eq('is_archived',$('archived').checked).order('full_name').limit(500);
  if(error){status('تعذر تحميل البيانات: '+error.message,true);return;}
  records=data||[];render();
@@ -57,8 +59,8 @@ function render(){
 async function init(){
  try{const {data:{user},error}=await supabase.auth.getUser();if(error||!user)throw Error('sign-in');uid=user.id;
  const {data:p,error:pe}=await supabase.from('staff_profiles').select('role,is_active,full_name').eq('user_id',uid).single();
- if(pe||!p?.is_active)throw Error('permission');role=p.role;canEdit=['secretary','admin','super_admin'].includes(role);
- if(!['secretary','accountant','admin','super_admin'].includes(role))throw Error('permission');
+ if(pe||!p?.is_active)throw Error('permission');role=p.role;const permitted=await getGrants(supabase);checkGrant=permitted;canEdit=role==='super_admin'||permitted('students.edit')||permitted('teachers.edit');
+ if(role!=='super_admin'&&!permitted('students.view')&&!permitted('students.edit')&&!permitted('teachers.view')&&!permitted('teachers.edit'))throw Error('permission');
  $('who').textContent=(p.full_name||user.email)+' · '+({secretary:'سكرتارية',accountant:'محاسب',admin:'مدير',super_admin:'مدير عام'}[role]);
  $('editor').hidden=!canEdit;$('readOnly').hidden=canEdit;$('state').hidden=true;$('app').style.display='block';await load()
  }catch(e){location.replace('./login.html')}
