@@ -53,7 +53,14 @@ body{background:#f5f7f6}
 <div><label for="paymentTerms">طريقة السداد</label><select id="paymentTerms"><option value="immediate">فوري</option><option value="credit">آجل</option></select></div><div id="dueField" hidden><label for="dueDate">تاريخ الاستحقاق *</label><input type="date" id="dueDate"></div><div id="notesField" class="wide"><label for="notes">ملاحظات</label><textarea id="notes" maxlength="3000"></textarea></div>
 <div class="full toolbar"><button id="save" type="submit">حفظ الحصة</button><button id="cancel" class="secondary" type="button" hidden>إلغاء التعديل</button></div></form>
 <p id="noPeople" class="muted" hidden>أضف طالبًا ومدرسًا أولًا من <a href="./people.html">وحدة الطلاب والمدرسين</a>.</p>
-<div id="status" role="status" aria-live="polite"></div></div>
+<div id="status" role="status" aria-live="polite"></div>
+<div id="collectPanel" class="panel" hidden style="background:#f4faf6;margin-top:16px">
+<h2>تحصيل قيمة الحصة المكتملة</h2><p class="muted" id="collectHint">لا يتم التحصيل إلا بعد اكتمال الحصة واعتماد سعر الساعة.</p>
+<div class="fields"><div><label for="collectAmount">المبلغ المحصل (ر.ق)</label><input id="collectAmount" type="number" min="0.01" step="0.01"></div>
+<div><label for="collectMethod">طريقة الدفع</label><select id="collectMethod"><option value="cash">نقدًا</option><option value="card">بطاقة</option><option value="bank">تحويل بنكي</option><option value="other">أخرى</option></select></div>
+<div><label for="collectRef">رقم مرجع التحصيل</label><input id="collectRef" maxlength="100"></div></div>
+<button type="button" id="collectSave" style="margin-top:12px">تأكيد التحصيل وربطه بالفاتورة</button>
+</div></div>
 <div id="readonly" class="panel" hidden><p class="muted">يمكنك الاطلاع على العمليات، لكن صلاحيتك لا تسمح بإضافتها أو تعديلها.</p></div>
 <div class="panel"><div class="row"><div><h2 id="tableTitle">سجل الحصص</h2><p id="count" class="muted">—</p></div><div class="toolbar">
 <input id="search" placeholder="بحث بالطالب أو المدرس أو المادة..." aria-label="البحث">
@@ -76,18 +83,24 @@ catalog=data||[];const field=$('subject'),keep=field.value;field.replaceChildren
 for(const x of catalog){const o=document.createElement('option');o.value=x.subject_name;o.textContent=x.subject_name;field.append(o)}field.value=keep;$('noSubjects').hidden=catalog.length>0}
 async function refreshPrice(){const field=$('lessonPrice');if(!field)return;const rate=priceData.find(x=>x.lesson_id===editing);
 field.value=rate&&Number($('hours').value)>0?(Number(rate.student_hourly_rate)*Number($('hours').value)).toFixed(2):'بانتظار تسعير الحصة'}
-async function loadPrice(){priceData=[];if(!editing){refreshPrice();return}const{data,error}=await supabase.from('lesson_rates').select('lesson_id,student_hourly_rate').eq('lesson_id',editing);if(!error)priceData=data||[];refreshPrice()}
+async function loadPrice(){priceData=[];if(!editing){refreshPrice();return}const{data,error}=await supabase.from('lesson_rates').select('lesson_id,student_hourly_rate').eq('lesson_id',editing);if(!error)priceData=data||[];refreshPrice();const r=records.find(x=>x.id===editing);const ready=kind==='lessons'&&r?.status==='completed'&&!r?.is_archived;
+$('collectPanel').hidden=!(ready&&canCollect);
+$('collectHint').textContent=!priceData.length?'الحصة تحتاج تسعيرًا أولًا من وحدة التسعير والمستحقات.':r?.payment_status==='paid'?'الحصة محصلة بالكامل؛ يمنع النظام التحصيل الزائد.':'تأكد من المبلغ قبل التحصيل؛ ستُنشأ الفاتورة ويرتبط التحصيل بها تلقائيًا.';
+$('collectSave').disabled=!priceData.length||r?.payment_status==='paid';
+if(priceData.length)$('collectAmount').value=(Number(priceData[0].student_hourly_rate)*Number(r.hours)).toFixed(2)}
 
 const roleLabels={secretary:'سكرتارية',accountant:'محاسب',admin:'مدير',super_admin:'مدير عام'};
 const statusLabels={scheduled:'مجدولة',confirmed:'مؤكدة',completed:'تمت',cancelled:'ملغاة',new:'جديد',in_progress:'جارٍ التنفيذ'};
 const paymentLabels={unpaid:'غير مدفوع',partial:'جزئيًا',paid:'مدفوع'};
 const serviceLabels={homework:'واجب',research:'بحث',project:'مشروع',other:'أخرى'};
-let role='',kind='lessons',uid='',canEdit=false,records=[],checkGrant=null,students=[],teachers=[],editing=null;
+let role='',kind='lessons',uid='',canEdit=false,records=[],checkGrant=null,students=[],teachers=[],editing=null,canCollect=false;
 function note(s,error=false){$('status').textContent=s;$('status').className=error?'error':'ok'}
 function option(select,items){select.replaceChildren();const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='اختر...';select.append(placeholder);for(const item of items){const o=document.createElement('option');o.value=item.id;o.textContent=item.full_name;select.append(o)}}
 function nameOf(items,id){return items.find(x=>x.id===id)?.full_name||'—'}
 function textCell(tr,content){const td=document.createElement('td');td.textContent=content??'—';tr.append(td);return td}
-function toggleCredit(){$('dueField').hidden=$('paymentTerms').value!=='credit';$('dueDate').required=$('paymentTerms').value==='credit'}
+function toggleCredit(){$('dueField').hidden=$('paymentTerms').value!=='credit';$('dueDate').required=$('paymentTerms').value==='credit';$('dueDate').max=addDays($('date').value,30);$('dueDate').min=$('date').value}
+function addDays(date,days){if(!date)return '';const d=new Date(date+'T12:00:00');d.setDate(d.getDate()+days);return d.toLocaleDateString('en-CA')}
+$('date').addEventListener('change',toggleCredit);
 $('paymentTerms').addEventListener('change',toggleCredit);
 function configure(){
  const lesson=kind==='lessons';
@@ -102,10 +115,11 @@ function configure(){
  $('noPeople').hidden=students.length>0 && (!lesson||teachers.length>0);toggleCredit();
 }
 function clearForm(){
- editing=null;priceData=[];$('form').reset();$('dueDate').value='';$('end_time').value='10:00';$('date').value=new Date().toLocaleDateString('en-CA');$('start_time').value='09:00';calculateHours();$('cancel').hidden=true;configure();
+ editing=null;priceData=[];$('collectPanel').hidden=true;$('form').reset();$('dueDate').value='';$('end_time').value='10:00';$('date').value=new Date().toLocaleDateString('en-CA');$('start_time').value='09:00';calculateHours();$('cancel').hidden=true;configure();
 }
+$('student_id').addEventListener('change',()=>{if(editing||kind!=='lessons')return;const student=students.find(x=>x.id===$('student_id').value);if(!student)return;$('paymentTerms').value=student.default_payment_terms||'immediate';if(student.default_payment_terms==='credit')$('dueDate').value=addDays($('date').value,Math.min(30,Number(student.default_credit_days)||30));toggleCredit()});
 async function loadPeople(){
- const [s,t]=await Promise.all([supabase.from('students').select('id,full_name').eq('is_archived',false).order('full_name').limit(1000),supabase.from('teachers').select('id,full_name').eq('is_archived',false).order('full_name').limit(1000)]);
+ const [s,t]=await Promise.all([supabase.from('students').select('id,full_name,default_payment_terms,default_credit_days').eq('is_archived',false).order('full_name').limit(1000),supabase.from('teachers').select('id,full_name').eq('is_archived',false).order('full_name').limit(1000)]);
  if(s.error||t.error){note('تعذر تحميل الطلاب والمدرسين، راجع الصلاحيات.',true);return false}
  students=s.data||[];teachers=t.data||[];option($('student_id'),students);option($('teacher_id'),teachers);configure();return true
 }
@@ -143,12 +157,18 @@ $('form').addEventListener('submit',async e=>{e.preventDefault();if(!canEdit)ret
  if(kind==='lessons'&&!calculateHours()){note('وقت النهاية يجب أن يكون بعد البداية',true);return}if(payload.payment_terms==='credit'&&!payload.due_date){note('تاريخ الاستحقاق مطلوب للسداد الآجل',true);return}if(payload.payment_terms==='credit'){const delta=(Date.parse(payload.due_date+'T00:00:00')-Date.parse($('date').value+'T00:00:00'))/86400000;if(delta<0||delta>30){note('تاريخ الاستحقاق من يوم الحصة وحتى 30 يومًا',true);return}}if(!payload.student_id||(kind==='lessons'&&(!payload.teacher_id||!payload.subject))){note('أكمل البيانات المطلوبة',true);return}
  $('save').disabled=true;const r=editing?await supabase.from(kind).update(payload).eq('id',editing):await supabase.from(kind).insert({...payload,created_by:uid});$('save').disabled=false;
  if(r.error){note('فشل الحفظ: '+r.error.message,true);return}clearForm();note('تم حفظ السجل بنجاح');await load()});
+$('collectSave').addEventListener('click',async()=>{if(!canCollect||!editing||kind!=='lessons')return;const amount=Number($('collectAmount').value);if(!(amount>0)){note('أدخل مبلغ التحصيل',true);return}
+if(!confirm('تأكيد استلام '+amount.toFixed(2)+' ر.ق وتسجيلها وربطها بالفاتورة؟'))return;
+$('collectSave').disabled=true;
+const{data,error}=await supabase.rpc('collect_lesson_payment',{p_lesson_id:editing,p_amount:amount,p_method:$('collectMethod').value,p_reference:$('collectRef').value.trim()||null});
+if(error)note('فشل التحصيل: '+error.message,true);else{note('تم تسجيل التحصيل. المتبقي: '+Number(data.remaining).toFixed(2)+' ر.ق');clearForm();await load()}
+$('collectSave').disabled=false});
 $('cancel').addEventListener('click',clearForm);$('reload').addEventListener('click',async()=>{await loadPeople();await loadSubjects();await load()});
 $('search').addEventListener('input',render);$('dateFilter').addEventListener('change',render);$('archived').addEventListener('change',()=>{clearForm();load()});
 document.querySelectorAll('[data-kind]').forEach(b=>b.addEventListener('click',()=>{kind=b.dataset.kind;document.querySelectorAll('[data-kind]').forEach(el=>{el.classList.toggle('active',el===b);el.setAttribute('aria-selected',String(el===b))});$('search').value='';$('dateFilter').value='';$('archived').checked=false;clearForm();load()}));
 $('logout').addEventListener('click',async()=>{await supabase.auth.signOut();location.replace('./login.html')});
 (async()=>{try{const {data:{user},error}=await supabase.auth.getUser();if(error||!user)throw Error('no-user');uid=user.id;
-const {data:p,error:pe}=await supabase.from('staff_profiles').select('full_name,role,is_active').eq('user_id',uid).single();if(pe||!p?.is_active)throw Error('not-authorized');role=p.role;checkGrant=await getGrants(supabase);canEdit=p.role==='super_admin'||checkGrant('lessons.edit')||checkGrant('services.edit');
+const {data:p,error:pe}=await supabase.from('staff_profiles').select('full_name,role,is_active').eq('user_id',uid).single();if(pe||!p?.is_active)throw Error('not-authorized');role=p.role;checkGrant=await getGrants(supabase);canCollect=p.role==='super_admin'||(['finance.edit','invoices.create','invoices.allocate'].every(checkGrant));canEdit=p.role==='super_admin'||checkGrant('lessons.edit')||checkGrant('services.edit');
 $('who').textContent=(p.full_name||user.email)+' · '+(roleLabels[p.role]||'موظف بصلاحيات مخصصة');$('editor').hidden=!canEdit;$('readonly').hidden=canEdit;
 $('state').hidden=true;$('app').style.display='block';clearForm();await loadPeople();await load()}catch(e){location.replace('./login.html')}})();
 </script><script src="./table-enhancements.js" defer></script></body></html>
