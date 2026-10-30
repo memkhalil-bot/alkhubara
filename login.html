@@ -50,7 +50,7 @@ form.addEventListener('submit',async event=>{
   if(error)throw error;
   const {data:profile,error:profileError}=await supabase.from('staff_profiles').select('is_active,role').eq('user_id',data.user.id).single();
   if(profileError||!profile?.is_active){await supabase.auth.signOut();throw new Error('not-authorized');}
-  message.textContent='تم التحقق من الحساب. ربط لوحة التحكم الآمنة قيد التطوير.';message.classList.add('success');
+  message.textContent='تم التحقق من الحساب. جارٍ فتح لوحة الموظفين...';message.classList.add('success');location.assign('./dashboard.html');
  }catch(e){message.textContent='تعذر تسجيل الدخول. تحقق من البيانات أو تواصل مع مدير النظام.';message.classList.add('error');}
  finally{button.disabled=false;button.textContent='دخول';}
 });
