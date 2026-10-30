@@ -1,0 +1,131 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الحصص والخدمات | مركز الخبراء التعليمي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{font-family:Cairo,Tahoma,Arial,sans-serif;background:#f5f7f6;color:#193831;font-synthesis:none}*{box-sizing:border-box}body{margin:0;min-height:100dvh}
+header{background:#123b38;color:white;display:flex;align-items:center;justify-content:space-between;padding:16px clamp(14px,3vw,34px);gap:12px;flex-wrap:wrap}
+h1{font-size:clamp(19px,3vw,24px);margin:0}small{color:#d0e6dc}main{max-width:1200px;margin:auto;padding:clamp(12px,3vw,28px)}
+.panel{background:white;border:1px solid #dce6df;border-radius:14px;padding:clamp(15px,3vw,23px);margin-bottom:17px}
+h2{font-size:20px;margin:0 0 6px}.muted{font-size:13px;color:#63786c;line-height:1.8}.row,.toolbar,.tabs{display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap}
+.toolbar,.tabs{justify-content:flex-start}button{font:700 14px Cairo,Tahoma,Arial,sans-serif;min-height:44px;padding:9px 17px;border:0;border-radius:10px;background:#12604d;color:white;cursor:pointer}
+button.secondary{background:#eaf3ee;color:#1b5542}button:disabled{opacity:.55;cursor:not-allowed}.tabs{margin:0 0 20px}.tabs button.active{background:#12604d;color:white}
+label{font-weight:700;font-size:13px;display:block;margin-bottom:5px}input,select,textarea{font:inherit;font-size:16px;color:#193831;min-height:45px;padding:9px 11px;width:100%;border:1px solid #cad9d0;border-radius:9px;background:#fff}
+input:focus,select:focus,textarea:focus{outline:3px solid #d9f0e3;border-color:#12604d}textarea{min-height:74px;resize:vertical}
+.fields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}.wide{grid-column:span 2}.full{grid-column:1/-1}
+.notice{border-right:4px solid #d5a041;padding:12px 15px;background:#fff8e9;border-radius:10px;color:#76531a;line-height:1.8;font-size:13px;margin-bottom:17px}
+.tablewrap{overflow-x:auto;width:100%}table{border-collapse:collapse;min-width:790px;width:100%}th,td{text-align:right;font-size:13px;padding:11px 9px;border-bottom:1px solid #e7eee8;vertical-align:middle}th{background:#f1f7f3}
+#app{display:none}#state{text-align:center;max-width:500px;margin:18vh auto;padding:16px}#status{min-height:27px;font-size:14px}.error{color:#a52828}.ok{color:#13704b}
+.pill{padding:4px 9px;border-radius:20px;background:#e6f1eb;font-size:12px}.actions{display:flex;gap:6px;flex-wrap:nowrap}
+#search{max-width:270px}#dateFilter{max-width:180px}.nowrap{white-space:nowrap}a{color:inherit}
+@media(max-width:940px){.fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.fields{grid-template-columns:1fr}.wide{grid-column:auto}header{align-items:flex-start}#search,#dateFilter{max-width:none;flex:1 1 100%}.toolbar{align-items:stretch}}
+</style></head><body>
+<div id="state" role="status">جارٍ التحقق من الحساب والصلاحيات...</div>
+<div id="app"><header><div><h1>🎓 الحصص والخدمات التعليمية</h1><small>مركز الخبراء التعليمي · قاعدة البيانات الفعلية</small></div>
+<div class="toolbar"><a href="./dashboard.html"><button type="button" class="secondary">لوحة التحكم</button></a><button id="logout" type="button" class="secondary">تسجيل الخروج</button></div></header>
+<main>
+<div class="notice">هذه النسخة لتجربة التشغيل. لا تدخل بيانات طلاب حقيقية قبل اعتماد ترحيل البيانات وسياسات الحسابات المالية. الأسعار ومستحقات المدرسين غير مخزنة في هذه الوحدة.</div>
+<div class="panel"><div class="row"><div><h2>إدارة العمليات التعليمية</h2><div id="who" class="muted"></div></div><div class="tabs" role="tablist" aria-label="الأقسام">
+<button id="lessonsTab" type="button" data-kind="lessons" class="active" role="tab" aria-selected="true">الحصص الدراسية</button>
+<button id="servicesTab" type="button" data-kind="educational_services" role="tab" aria-selected="false">الخدمات التعليمية</button>
+</div></div></div>
+<div id="editor" class="panel">
+<h2 id="formTitle">إضافة حصة</h2><form id="form" class="fields">
+<div><label for="date">التاريخ *</label><input id="date" name="date" type="date" required></div>
+<div><label for="student_id">الطالب *</label><select id="student_id" required></select></div>
+<div id="teacherField"><label for="teacher_id">المدرس *</label><select id="teacher_id"></select></div>
+<div id="timeField"><label for="start_time">وقت البداية *</label><input id="start_time" type="time" value="09:00"></div>
+<div id="hoursField"><label for="hours">عدد الساعات *</label><input id="hours" type="number" min="0.25" max="24" step="0.25" value="1"></div>
+<div id="subjectField" class="wide"><label for="subject">المادة *</label><input id="subject" maxlength="200" placeholder="مثال: رياضيات"></div>
+<div id="serviceTypeField" hidden><label for="service_type">نوع الخدمة *</label><select id="service_type"><option value="homework">واجب</option><option value="research">بحث</option><option value="project">مشروع</option><option value="other">أخرى</option></select></div>
+<div id="descriptionField" class="wide" hidden><label for="description">وصف الخدمة *</label><input id="description" maxlength="1000"></div>
+<div><label for="statusInput">حالة العملية</label><select id="statusInput"></select></div>
+<div><label for="payment_status">حالة السداد</label><select id="payment_status"><option value="unpaid">غير مدفوع</option><option value="partial">مدفوع جزئيًا</option><option value="paid">مدفوع</option></select></div>
+<div id="notesField" class="wide"><label for="notes">ملاحظات</label><textarea id="notes" maxlength="3000"></textarea></div>
+<div class="full toolbar"><button id="save" type="submit">حفظ الحصة</button><button id="cancel" class="secondary" type="button" hidden>إلغاء التعديل</button></div></form>
+<p id="noPeople" class="muted" hidden>أضف طالبًا ومدرسًا أولًا من <a href="./people.html">وحدة الطلاب والمدرسين</a>.</p>
+<div id="status" role="status" aria-live="polite"></div></div>
+<div id="readonly" class="panel" hidden><p class="muted">يمكنك الاطلاع على العمليات، لكن صلاحيتك لا تسمح بإضافتها أو تعديلها.</p></div>
+<div class="panel"><div class="row"><div><h2 id="tableTitle">سجل الحصص</h2><p id="count" class="muted">—</p></div><div class="toolbar">
+<input id="search" placeholder="بحث بالطالب أو المدرس أو المادة..." aria-label="البحث">
+<input id="dateFilter" type="date" aria-label="تصفية بالتاريخ">
+<label class="nowrap" style="margin:0"><input id="archived" type="checkbox" style="width:auto;min-height:auto"> عرض المؤرشف</label>
+<button class="secondary" id="reload" type="button">تحديث</button></div></div>
+<div class="tablewrap"><table><thead><tr id="head"></tr></thead><tbody id="rows"></tbody></table></div></div>
+</main></div>
+<script type="module">
+import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.0';
+const supabase=createClient('https://uqjoxgcddpwfbjanzqpy.supabase.co',"sb_publishable_-FhtYmDD0qO6mEB2nBE_rQ_j_SE_unY");
+const $=id=>document.getElementById(id);
+const roleLabels={secretary:'سكرتارية',accountant:'محاسب',admin:'مدير',super_admin:'مدير عام'};
+const statusLabels={scheduled:'مجدولة',confirmed:'مؤكدة',completed:'تمت',cancelled:'ملغاة',new:'جديد',in_progress:'جارٍ التنفيذ'};
+const paymentLabels={unpaid:'غير مدفوع',partial:'جزئيًا',paid:'مدفوع'};
+const serviceLabels={homework:'واجب',research:'بحث',project:'مشروع',other:'أخرى'};
+let kind='lessons',uid='',canEdit=false,records=[],students=[],teachers=[],editing=null;
+function note(s,error=false){$('status').textContent=s;$('status').className=error?'error':'ok'}
+function option(select,items){select.replaceChildren();const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='اختر...';select.append(placeholder);for(const item of items){const o=document.createElement('option');o.value=item.id;o.textContent=item.full_name;select.append(o)}}
+function nameOf(items,id){return items.find(x=>x.id===id)?.full_name||'—'}
+function textCell(tr,content){const td=document.createElement('td');td.textContent=content??'—';tr.append(td);return td}
+function configure(){
+ const lesson=kind==='lessons';
+ for(const id of ['teacherField','timeField','hoursField','subjectField','notesField'])$(id).hidden=!lesson;
+ for(const id of ['serviceTypeField','descriptionField'])$(id).hidden=lesson;
+ $('teacher_id').required=lesson;$('start_time').required=lesson;$('hours').required=lesson;$('subject').required=lesson;$('description').required=!lesson;
+ $('statusInput').replaceChildren();
+ for(const [value,label] of (lesson?[['scheduled','مجدولة'],['confirmed','مؤكدة'],['completed','تمت'],['cancelled','ملغاة']]:[['new','جديد'],['in_progress','جارٍ التنفيذ'],['completed','مكتمل'],['cancelled','ملغاة']])){const op=document.createElement('option');op.value=value;op.textContent=label;$('statusInput').append(op)}
+ $('formTitle').textContent=lesson?'إضافة حصة':'إضافة خدمة تعليمية';$('tableTitle').textContent=lesson?'سجل الحصص':'سجل الخدمات';$('save').textContent=lesson?'حفظ الحصة':'حفظ الخدمة';$('search').placeholder=lesson?'بحث بالطالب أو المدرس أو المادة...':'بحث بالطالب أو وصف الخدمة...';
+ const cols=lesson?['التاريخ','الطالب','المدرس','المادة','الوقت','الساعات','الحالة','السداد','الإجراءات']:['التاريخ','الطالب','نوع الخدمة','الوصف','الحالة','السداد','الإجراءات'];
+ $('head').replaceChildren();cols.forEach(x=>{const th=document.createElement('th');th.textContent=x;$('head').append(th)});
+ $('noPeople').hidden=students.length>0 && (!lesson||teachers.length>0);
+}
+function clearForm(){
+ editing=null;$('form').reset();$('date').value=new Date().toLocaleDateString('en-CA');$('start_time').value='09:00';$('hours').value='1';$('cancel').hidden=true;configure();
+}
+async function loadPeople(){
+ const [s,t]=await Promise.all([supabase.from('students').select('id,full_name').eq('is_archived',false).order('full_name').limit(1000),supabase.from('teachers').select('id,full_name').eq('is_archived',false).order('full_name').limit(1000)]);
+ if(s.error||t.error){note('تعذر تحميل الطلاب والمدرسين، راجع الصلاحيات.',true);return false}
+ students=s.data||[];teachers=t.data||[];option($('student_id'),students);option($('teacher_id'),teachers);configure();return true
+}
+async function load(){
+ $('count').textContent='جارٍ التحميل...';$('rows').replaceChildren();
+ const cols=kind==='lessons'?'id,student_id,teacher_id,lesson_date,start_time,hours,subject,status,payment_status,notes,is_archived':'id,student_id,service_date,service_type,description,status,payment_status,is_archived';
+ const {data,error}=await supabase.from(kind).select(cols).eq('is_archived',$('archived').checked).order(kind==='lessons'?'lesson_date':'service_date',{ascending:false}).limit(500);
+ if(error){note('تعذر تحميل السجلات: '+error.message,true);$('count').textContent='خطأ في التحميل';return}
+ records=data||[];render();
+}
+function render(){
+ const q=$('search').value.trim().toLocaleLowerCase('ar'),date=$('dateFilter').value;
+ const filtered=records.filter(r=>{const hay=[nameOf(students,r.student_id),nameOf(teachers,r.teacher_id),r.subject,r.description,serviceLabels[r.service_type]].join(' ').toLocaleLowerCase('ar');return (!q||hay.includes(q))&&(!date||(r.lesson_date||r.service_date)===date)});
+ $('count').textContent=filtered.length+' سجل معروض (حد أقصى 500)';$('rows').replaceChildren();
+ if(!filtered.length){const tr=document.createElement('tr');const td=textCell(tr,'لا توجد سجلات مطابقة');td.colSpan=kind==='lessons'?9:7;$('rows').append(tr);return}
+ for(const rec of filtered){const tr=document.createElement('tr');textCell(tr,rec.lesson_date||rec.service_date);textCell(tr,nameOf(students,rec.student_id));
+  if(kind==='lessons'){textCell(tr,nameOf(teachers,rec.teacher_id));textCell(tr,rec.subject);textCell(tr,rec.start_time?.slice(0,5));textCell(tr,rec.hours)}
+  else{textCell(tr,serviceLabels[rec.service_type]);textCell(tr,rec.description)}
+  textCell(tr,statusLabels[rec.status]||rec.status);textCell(tr,paymentLabels[rec.payment_status]||rec.payment_status);
+  const td=document.createElement('td');td.className='actions';
+  if(canEdit){const b=document.createElement('button');b.className='secondary';b.type='button';b.textContent='تعديل';b.addEventListener('click',()=>edit(rec));td.append(b);
+  const a=document.createElement('button');a.className='secondary';a.type='button';a.textContent=rec.is_archived?'استعادة':'أرشفة';
+  a.addEventListener('click',async()=>{if(!confirm((rec.is_archived?'استعادة':'أرشفة')+' هذا السجل؟'))return;a.disabled=true;const {error}=await supabase.from(kind).update({is_archived:!rec.is_archived,updated_by:uid}).eq('id',rec.id);if(error)note('فشل تحديث الحالة: '+error.message,true);else{note('تم تحديث الحالة');await load()}a.disabled=false});td.append(a)}
+  else td.textContent='عرض فقط';tr.append(td);$('rows').append(tr)}
+}
+function edit(r){editing=r.id;$('student_id').value=r.student_id;$('date').value=r.lesson_date||r.service_date;$('statusInput').value=r.status;$('payment_status').value=r.payment_status;
+ if(kind==='lessons'){$('teacher_id').value=r.teacher_id;$('start_time').value=r.start_time?.slice(0,5)||'09:00';$('hours').value=r.hours;$('subject').value=r.subject;$('notes').value=r.notes||''}
+ else{$('service_type').value=r.service_type;$('description').value=r.description}
+ $('formTitle').textContent='تعديل سجل';$('save').textContent='حفظ التعديل';$('cancel').hidden=false;window.scrollTo({top:0,behavior:'smooth'})}
+$('form').addEventListener('submit',async e=>{e.preventDefault();if(!canEdit)return;
+ const payload={student_id:$('student_id').value,status:$('statusInput').value,payment_status:$('payment_status').value,updated_by:uid};
+ if(kind==='lessons')Object.assign(payload,{lesson_date:$('date').value,teacher_id:$('teacher_id').value,start_time:$('start_time').value,hours:Number($('hours').value),subject:$('subject').value.trim(),notes:$('notes').value.trim()||null});
+ else Object.assign(payload,{service_date:$('date').value,service_type:$('service_type').value,description:$('description').value.trim()});
+ if(!payload.student_id||(kind==='lessons'&&(!payload.teacher_id||!payload.subject))){note('أكمل البيانات المطلوبة',true);return}
+ $('save').disabled=true;const r=editing?await supabase.from(kind).update(payload).eq('id',editing):await supabase.from(kind).insert({...payload,created_by:uid});$('save').disabled=false;
+ if(r.error){note('فشل الحفظ: '+r.error.message,true);return}clearForm();note('تم حفظ السجل بنجاح');await load()});
+$('cancel').addEventListener('click',clearForm);$('reload').addEventListener('click',async()=>{await loadPeople();await load()});
+$('search').addEventListener('input',render);$('dateFilter').addEventListener('change',render);$('archived').addEventListener('change',()=>{clearForm();load()});
+document.querySelectorAll('[data-kind]').forEach(b=>b.addEventListener('click',()=>{kind=b.dataset.kind;document.querySelectorAll('[data-kind]').forEach(el=>{el.classList.toggle('active',el===b);el.setAttribute('aria-selected',String(el===b))});$('search').value='';$('dateFilter').value='';$('archived').checked=false;clearForm();load()}));
+$('logout').addEventListener('click',async()=>{await supabase.auth.signOut();location.replace('./login.html')});
+(async()=>{try{const {data:{user},error}=await supabase.auth.getUser();if(error||!user)throw Error('no-user');uid=user.id;
+const {data:p,error:pe}=await supabase.from('staff_profiles').select('full_name,role,is_active').eq('user_id',uid).single();if(pe||!p?.is_active||!roleLabels[p.role])throw Error('not-authorized');canEdit=['secretary','admin','super_admin'].includes(p.role);
+$('who').textContent=(p.full_name||user.email)+' · '+roleLabels[p.role];$('editor').hidden=!canEdit;$('readonly').hidden=canEdit;
+$('state').hidden=true;$('app').style.display='block';clearForm();await loadPeople();await load()}catch(e){location.replace('./login.html')}})();
+</script></body></html>
