@@ -43,12 +43,13 @@ body{background:#f5f7f6}
 <div><label for="student_id">الطالب *</label><select id="student_id" required></select></div>
 <div id="teacherField"><label for="teacher_id">المدرس *</label><select id="teacher_id"></select></div>
 <div id="timeField"><label for="start_time">وقت البداية *</label><input id="start_time" type="time" value="09:00"></div>
-<div id="hoursField"><label for="hours">عدد الساعات *</label><input id="hours" type="number" min="0.25" max="24" step="0.25" value="1"></div>
-<div id="subjectField" class="wide"><label for="subject">المادة *</label><input id="subject" maxlength="200" placeholder="مثال: رياضيات"></div>
+<div id="endTimeField"><label for="end_time">وقت النهاية *</label><input id="end_time" type="time" value="10:00"></div><div id="hoursField"><label for="hours">المدة (محسوبة تلقائيًا)</label><input id="hours" type="number" step="0.01" readonly value="1"></div><div id="locationField"><label for="lesson_location">مكان الحصة</label><select id="lesson_location"><option value="center">داخل المركز</option><option value="outside">خارج المركز</option><option value="online">أونلاين</option></select></div>
+<div id="subjectField" class="wide"><label for="subject">المادة *</label><select id="subject"><option value="">اختر المادة من القائمة</option></select><p class="muted" id="noSubjects" hidden>لا توجد مواد مسجلة؛ أضف المادة من صفحة الطلاب والمدرسين أولًا.</p></div>
 <div id="serviceTypeField" hidden><label for="service_type">نوع الخدمة *</label><select id="service_type"><option value="homework">واجب</option><option value="research">بحث</option><option value="project">مشروع</option><option value="other">أخرى</option></select></div>
 <div id="descriptionField" class="wide" hidden><label for="description">وصف الخدمة *</label><input id="description" maxlength="1000"></div>
 <div><label for="statusInput">حالة العملية</label><select id="statusInput"></select></div>
-<div><label for="payment_status">حالة السداد</label><select id="payment_status"><option value="unpaid">غير مدفوع</option><option value="partial">مدفوع جزئيًا</option><option value="paid">مدفوع</option></select></div>
+<div><label for="payment_status">حالة السداد الفعلية</label><select id="payment_status" disabled><option value="unpaid">لم يُحصّل</option><option value="partial">محصل جزئيًا</option><option value="paid">محصل بالكامل</option></select></div>
+<div id="lessonPriceField"><label for="lessonPrice">قيمة الحصة (ر.ق)</label><input id="lessonPrice" readonly value="بانتظار تسعير الحصة"><small class="muted">يُحتسب من سعر الساعة المعتمد × مدة الحصة. السداد والتأكيد من الفواتير والتحصيلات فقط.</small></div>
 <div><label for="paymentTerms">طريقة السداد</label><select id="paymentTerms"><option value="immediate">فوري</option><option value="credit">آجل</option></select></div><div id="dueField" hidden><label for="dueDate">تاريخ الاستحقاق *</label><input type="date" id="dueDate"></div><div id="notesField" class="wide"><label for="notes">ملاحظات</label><textarea id="notes" maxlength="3000"></textarea></div>
 <div class="full toolbar"><button id="save" type="submit">حفظ الحصة</button><button id="cancel" class="secondary" type="button" hidden>إلغاء التعديل</button></div></form>
 <p id="noPeople" class="muted" hidden>أضف طالبًا ومدرسًا أولًا من <a href="./people.html">وحدة الطلاب والمدرسين</a>.</p>
@@ -66,6 +67,17 @@ import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.0';
 const supabase=createClient('https://uqjoxgcddpwfbjanzqpy.supabase.co',"sb_publishable_-FhtYmDD0qO6mEB2nBE_rQ_j_SE_unY");
 async function getGrants(client){const{data,error}=await client.from('user_permissions').select('permission');if(error)throw Error(error.message);const allowed=new Set((data||[]).map(x=>x.permission));return key=>allowed.has(key)}
 const $=id=>document.getElementById(id);
+const minutes=v=>{const m=/^(\d\d):(\d\d)$/.exec(v||'');return m?Number(m[1])*60+Number(m[2]):NaN};
+function calculateHours(){const diff=minutes($('end_time').value)-minutes($('start_time').value);const valid=diff>0&&diff<=720;$('hours').value=valid?(diff/60).toFixed(2):'';refreshPrice();return valid}
+$('start_time').addEventListener('change',calculateHours);$('end_time').addEventListener('change',calculateHours);
+let catalog=[],priceData=[];
+async function loadSubjects(){const {data,error}=await supabase.from('academic_subjects').select('id,subject_name').order('subject_name');if(error){note('تعذر تحميل المواد: '+error.message,true);return}
+catalog=data||[];const field=$('subject'),keep=field.value;field.replaceChildren();const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='اختر المادة المسجلة';field.append(placeholder);
+for(const x of catalog){const o=document.createElement('option');o.value=x.subject_name;o.textContent=x.subject_name;field.append(o)}field.value=keep;$('noSubjects').hidden=catalog.length>0}
+async function refreshPrice(){const field=$('lessonPrice');if(!field)return;const rate=priceData.find(x=>x.lesson_id===editing);
+field.value=rate&&Number($('hours').value)>0?(Number(rate.student_hourly_rate)*Number($('hours').value)).toFixed(2):'بانتظار تسعير الحصة'}
+async function loadPrice(){priceData=[];if(!editing){refreshPrice();return}const{data,error}=await supabase.from('lesson_rates').select('lesson_id,student_hourly_rate').eq('lesson_id',editing);if(!error)priceData=data||[];refreshPrice()}
+
 const roleLabels={secretary:'سكرتارية',accountant:'محاسب',admin:'مدير',super_admin:'مدير عام'};
 const statusLabels={scheduled:'مجدولة',confirmed:'مؤكدة',completed:'تمت',cancelled:'ملغاة',new:'جديد',in_progress:'جارٍ التنفيذ'};
 const paymentLabels={unpaid:'غير مدفوع',partial:'جزئيًا',paid:'مدفوع'};
@@ -79,9 +91,9 @@ function toggleCredit(){$('dueField').hidden=$('paymentTerms').value!=='credit';
 $('paymentTerms').addEventListener('change',toggleCredit);
 function configure(){
  const lesson=kind==='lessons';
- for(const id of ['teacherField','timeField','hoursField','subjectField','notesField'])$(id).hidden=!lesson;
+ for(const id of ['teacherField','timeField','endTimeField','hoursField','locationField','subjectField','lessonPriceField','notesField'])$(id).hidden=!lesson;
  for(const id of ['serviceTypeField','descriptionField'])$(id).hidden=lesson;
- $('teacher_id').required=lesson;$('start_time').required=lesson;$('hours').required=lesson;$('subject').required=lesson;$('description').required=!lesson;
+ $('teacher_id').required=lesson;$('start_time').required=lesson;$('end_time').required=lesson;$('hours').required=false;$('subject').required=lesson;$('description').required=!lesson;
  $('statusInput').replaceChildren();
  for(const [value,label] of (lesson?[['scheduled','مجدولة'],['confirmed','مؤكدة'],['completed','تمت'],['cancelled','ملغاة']]:[['new','جديد'],['in_progress','جارٍ التنفيذ'],['completed','مكتمل'],['cancelled','ملغاة']])){const op=document.createElement('option');op.value=value;op.textContent=label;$('statusInput').append(op)}
  $('formTitle').textContent=lesson?'إضافة حصة':'إضافة خدمة تعليمية';$('tableTitle').textContent=lesson?'سجل الحصص':'سجل الخدمات';$('save').textContent=lesson?'حفظ الحصة':'حفظ الخدمة';$('search').placeholder=lesson?'بحث بالطالب أو المدرس أو المادة...':'بحث بالطالب أو وصف الخدمة...';
@@ -90,7 +102,7 @@ function configure(){
  $('noPeople').hidden=students.length>0 && (!lesson||teachers.length>0);toggleCredit();
 }
 function clearForm(){
- editing=null;$('form').reset();$('dueDate').value='';$('date').value=new Date().toLocaleDateString('en-CA');$('start_time').value='09:00';$('hours').value='1';$('cancel').hidden=true;configure();
+ editing=null;priceData=[];$('form').reset();$('dueDate').value='';$('end_time').value='10:00';$('date').value=new Date().toLocaleDateString('en-CA');$('start_time').value='09:00';calculateHours();$('cancel').hidden=true;configure();
 }
 async function loadPeople(){
  const [s,t]=await Promise.all([supabase.from('students').select('id,full_name').eq('is_archived',false).order('full_name').limit(1000),supabase.from('teachers').select('id,full_name').eq('is_archived',false).order('full_name').limit(1000)]);
@@ -100,7 +112,7 @@ async function loadPeople(){
 async function load(){
  const key=kind==='lessons'?'lessons':'services';canEdit=role==='super_admin'||checkGrant(key+'.edit');$('editor').hidden=!canEdit;$('readonly').hidden=canEdit;if(role!=='super_admin'&&!canEdit&&!checkGrant(key+'.view')){note('ليس لديك صلاحية لهذا القسم',true);$('rows').replaceChildren();return}
  $('count').textContent='جارٍ التحميل...';$('rows').replaceChildren();
- const cols=kind==='lessons'?'id,student_id,teacher_id,lesson_date,start_time,hours,subject,status,payment_status,payment_terms,due_date,notes,is_archived':'id,student_id,service_date,service_type,description,status,payment_status,payment_terms,due_date,is_archived';
+ const cols=kind==='lessons'?'id,student_id,teacher_id,lesson_date,start_time,end_time,hours,subject,lesson_location,status,payment_status,payment_terms,due_date,notes,is_archived':'id,student_id,service_date,service_type,description,status,payment_status,payment_terms,due_date,is_archived';
  const {data,error}=await supabase.from(kind).select(cols).eq('is_archived',$('archived').checked).order(kind==='lessons'?'lesson_date':'service_date',{ascending:false}).limit(500);
  if(error){note('تعذر تحميل السجلات: '+error.message,true);$('count').textContent='خطأ في التحميل';return}
  records=data||[];render();
@@ -121,17 +133,17 @@ function render(){
   else td.textContent='عرض فقط';tr.append(td);$('rows').append(tr)}
 }
 function edit(r){editing=r.id;$('student_id').value=r.student_id;$('date').value=r.lesson_date||r.service_date;$('statusInput').value=r.status;$('payment_status').value=r.payment_status;$('paymentTerms').value=r.payment_terms||'immediate';$('dueDate').value=r.due_date||'';toggleCredit();
- if(kind==='lessons'){$('teacher_id').value=r.teacher_id;$('start_time').value=r.start_time?.slice(0,5)||'09:00';$('hours').value=r.hours;$('subject').value=r.subject;$('notes').value=r.notes||''}
+ if(kind==='lessons'){$('teacher_id').value=r.teacher_id;$('start_time').value=r.start_time?.slice(0,5)||'09:00';$('end_time').value=r.end_time?.slice(0,5)||'10:00';calculateHours();$('subject').value=r.subject;$('lesson_location').value=r.lesson_location||'center';$('notes').value=r.notes||''}
  else{$('service_type').value=r.service_type;$('description').value=r.description}
- $('formTitle').textContent='تعديل سجل';$('save').textContent='حفظ التعديل';$('cancel').hidden=false;window.scrollTo({top:0,behavior:'smooth'})}
+ loadPrice();$('formTitle').textContent='تعديل سجل';$('save').textContent='حفظ التعديل';$('cancel').hidden=false;window.scrollTo({top:0,behavior:'smooth'})}
 $('form').addEventListener('submit',async e=>{e.preventDefault();if(!canEdit)return;
- const payload={student_id:$('student_id').value,status:$('statusInput').value,payment_status:$('payment_status').value,payment_terms:$('paymentTerms').value,due_date:$('paymentTerms').value==='credit'?$('dueDate').value:null,updated_by:uid};
- if(kind==='lessons')Object.assign(payload,{lesson_date:$('date').value,teacher_id:$('teacher_id').value,start_time:$('start_time').value,hours:Number($('hours').value),subject:$('subject').value.trim(),notes:$('notes').value.trim()||null});
+ const payload={student_id:$('student_id').value,status:$('statusInput').value,payment_terms:$('paymentTerms').value,due_date:$('paymentTerms').value==='credit'?$('dueDate').value:null,updated_by:uid};
+ if(kind==='lessons')Object.assign(payload,{lesson_date:$('date').value,teacher_id:$('teacher_id').value,start_time:$('start_time').value,end_time:$('end_time').value,lesson_location:$('lesson_location').value,subject:$('subject').value,notes:$('notes').value.trim()||null});
  else Object.assign(payload,{service_date:$('date').value,service_type:$('service_type').value,description:$('description').value.trim()});
- if(payload.payment_terms==='credit'&&!payload.due_date){note('تاريخ الاستحقاق مطلوب للسداد الآجل',true);return}if(!payload.student_id||(kind==='lessons'&&(!payload.teacher_id||!payload.subject))){note('أكمل البيانات المطلوبة',true);return}
+ if(kind==='lessons'&&!calculateHours()){note('وقت النهاية يجب أن يكون بعد البداية',true);return}if(payload.payment_terms==='credit'&&!payload.due_date){note('تاريخ الاستحقاق مطلوب للسداد الآجل',true);return}if(payload.payment_terms==='credit'){const delta=(Date.parse(payload.due_date+'T00:00:00')-Date.parse($('date').value+'T00:00:00'))/86400000;if(delta<0||delta>30){note('تاريخ الاستحقاق من يوم الحصة وحتى 30 يومًا',true);return}}if(!payload.student_id||(kind==='lessons'&&(!payload.teacher_id||!payload.subject))){note('أكمل البيانات المطلوبة',true);return}
  $('save').disabled=true;const r=editing?await supabase.from(kind).update(payload).eq('id',editing):await supabase.from(kind).insert({...payload,created_by:uid});$('save').disabled=false;
  if(r.error){note('فشل الحفظ: '+r.error.message,true);return}clearForm();note('تم حفظ السجل بنجاح');await load()});
-$('cancel').addEventListener('click',clearForm);$('reload').addEventListener('click',async()=>{await loadPeople();await load()});
+$('cancel').addEventListener('click',clearForm);$('reload').addEventListener('click',async()=>{await loadPeople();await loadSubjects();await load()});
 $('search').addEventListener('input',render);$('dateFilter').addEventListener('change',render);$('archived').addEventListener('change',()=>{clearForm();load()});
 document.querySelectorAll('[data-kind]').forEach(b=>b.addEventListener('click',()=>{kind=b.dataset.kind;document.querySelectorAll('[data-kind]').forEach(el=>{el.classList.toggle('active',el===b);el.setAttribute('aria-selected',String(el===b))});$('search').value='';$('dateFilter').value='';$('archived').checked=false;clearForm();load()}));
 $('logout').addEventListener('click',async()=>{await supabase.auth.signOut();location.replace('./login.html')});
