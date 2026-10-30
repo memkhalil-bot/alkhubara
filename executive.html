@@ -1,0 +1,172 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Executive Dashboard | مركز الخبراء</title><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{font-family:Cairo,Tahoma,Arial,sans-serif;color:#19382f;background:#f5f7f6}*{box-sizing:border-box}body{margin:0}header{background:#123b38;color:white;padding:17px clamp(12px,3vw,32px);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}h1{margin:0;font-size:clamp(19px,3vw,25px)}header small{color:#c5ddd2}main{max-width:1540px;padding:clamp(12px,2vw,24px);margin:auto}.panel{background:white;border:1px solid #dfe8e2;border-radius:14px;padding:clamp(13px,2vw,20px);margin-bottom:15px;break-inside:avoid}h2{font-size:18px;margin:0 0 13px}.sub{color:#63796c;font-size:12px;line-height:1.7}.filter{display:flex;gap:11px;flex-wrap:wrap;align-items:end}.field{flex:1 1 135px}label{display:block;font-size:12px;font-weight:700;margin-bottom:5px}select,input{font:inherit;background:#fff;border:1px solid #c6d8cc;border-radius:9px;padding:9px;width:100%;min-height:42px}button{font:700 13px Cairo,Tahoma,Arial,sans-serif;background:#12604d;color:#fff;border:0;border-radius:9px;padding:9px 15px;min-height:43px;cursor:pointer}button.secondary{background:#e8f2ed;color:#18563f}button:disabled{opacity:.6}.cards{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}.kpi{background:#f0f6f2;border:1px solid #e0ece4;border-radius:12px;padding:13px;min-height:100px}.kpi span{font-size:12px;color:#4e6e5f;display:block;line-height:1.7}.kpi strong{font-size:clamp(18px,2vw,25px);display:block;margin-top:9px;white-space:nowrap}.kpi small{font-size:10px;color:#6c8779;display:block}.twocol{display:grid;grid-template-columns:1fr 1fr;gap:15px}.charts{display:grid;gap:12px}.chartrow{display:grid;grid-template-columns:minmax(90px,140px) 1fr 60px;align-items:center;gap:8px;font-size:12px;margin-bottom:8px}.bartrack{height:13px;background:#e9f0eb;border-radius:9px;overflow:hidden}.bar{height:100%;background:#17715c;border-radius:9px}.bar.alt{background:#da9d39}.bar.warn{background:#bf6c52}.chartrow b{text-align:left;font-size:12px}.wrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:500px}th,td{padding:9px 8px;border-bottom:1px solid #e8eee9;text-align:right;font-size:12px}th{background:#f2f7f3}.notice{background:#fff8e9;border-right:4px solid #d3a345;border-radius:8px;padding:13px;line-height:1.8;font-size:12px}.alerts li{padding:7px 0;font-size:13px;border-bottom:1px solid #e8eee9}.failure{color:#af3030}.right{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.legend{display:flex;gap:15px;font-size:11px;color:#60746b}.dot{display:inline-block;width:10px;height:10px;background:#17715c;border-radius:3px;margin-left:4px}.dot.alt{background:#da9d39}#app{display:none}#gate{text-align:center;margin:15vh auto;padding:15px}.printinfo{display:none}.empty{font-size:13px;color:#64786c;padding:8px}
+@media(max-width:1150px){.cards{grid-template-columns:repeat(4,1fr)}}@media(max-width:700px){.cards{grid-template-columns:repeat(2,1fr)}.twocol{grid-template-columns:1fr}.chartrow{grid-template-columns:85px 1fr 48px}main{padding:10px}}
+@page{size:A3 landscape;margin:9mm}
+@media print{html,body{background:white!important;color:black!important}header{background:white;color:black;padding:0 0 10px;border-bottom:2px solid #253b2c}.screenonly{display:none!important}.printinfo{display:block;font-size:11px;margin:7px 0}.cards{grid-template-columns:repeat(6,1fr)}.twocol{grid-template-columns:1fr 1fr;gap:9px}.panel{box-shadow:none;border:1px solid #d9dedb;padding:10px;margin-bottom:8px;break-inside:avoid}.kpi{min-height:70px;padding:8px}.kpi strong{font-size:15px}.chartrow{margin-bottom:5px}.bartrack,.kpi{print-color-adjust:exact;-webkit-print-color-adjust:exact}th,td{font-size:10px;padding:5px}main{max-width:none;padding:8px}.wrap{overflow:visible}table{min-width:0}h2{font-size:14px;margin:0 0 7px}}
+
+main{max-width:1440px;padding:13px 20px}.panel{padding:13px 15px;margin-bottom:10px;border-radius:9px}h2{font-size:15px;margin-bottom:8px}
+.cards{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.kpi{min-height:64px;padding:9px 11px;border-radius:7px;background:#fff;border-top:2px solid #18745d}.kpi span{font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.kpi strong{font-size:clamp(17px,1.7vw,22px);margin-top:3px}.kpi small{display:none}
+.twocol{gap:10px}.threecol{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.charts{gap:5px}.chartrow{font-size:10px;grid-template-columns:minmax(75px,105px) 1fr 50px;gap:6px;margin-bottom:4px}.chartrow b{font-size:10px}.bartrack{height:10px}
+.mini{display:flex;flex-wrap:wrap;gap:6px 16px;padding:9px 0;border-bottom:1px solid #dae5df}.mini span{color:#687c70;font-size:11px}.mini b{color:#19382f;margin-inline-start:5px}
+.details{border:1px solid #dfe8e2;border-radius:9px;background:#fff;margin:10px 0}.details summary{font-size:12px;font-weight:700;cursor:pointer;padding:12px}.details>.twocol,.details>.panel{margin:9px}
+.alerts li{font-size:11px;padding:4px 0}.chart-svg{width:100%;height:150px;display:block}
+@media(max-width:1050px){.threecol{grid-template-columns:repeat(2,1fr)}}@media(max-width:700px){.cards{grid-template-columns:repeat(2,1fr)}.threecol{grid-template-columns:1fr}.twocol{grid-template-columns:1fr}main{padding:9px}}
+@media print{.cards{grid-template-columns:repeat(4,1fr)}.threecol{grid-template-columns:repeat(3,1fr)}.twocol{grid-template-columns:1fr 1fr}.kpi{min-height:50px}.chart-svg{height:120px}.details:not([open]){display:none}}
+</style><style>/* Shared embedded-workspace header: title only, no duplicate navigation controls */header{background:transparent!important;color:#193c31!important;border:0!important;padding:12px 4px!important;box-shadow:none!important}header h1{color:#193c31!important;font-size:21px!important}header small,header a,header button,header .toolbar{display:none!important}header{min-height:48px!important}body{background:#f5f7f6}</style><style>
+/* Unified title-only header inside the central workspace */
+header{background:transparent!important;color:#193b30!important;box-shadow:none!important;border:0!important;padding:13px 5px 7px!important;min-height:45px!important}
+header h1{color:#193b30!important;font-size:20px!important;margin:0!important;line-height:1.6!important}
+header small,header .toolbar,header>a,header>button,header>div:not(:first-child){display:none!important}
+header>div:first-child small{display:none!important}
+body{background:#f5f7f6}
+</style></head><body><p id="gate" role="status">جارٍ التحقق من صلاحية المدير التنفيذي...</p><div id="app"><header><div><h1>لوحة المؤشرات التنفيذية</h1><small>مركز الخبراء التعليمي · Executive Business Intelligence</small></div><div class="right screenonly"><a href="./dashboard.html"><button class="secondary">الصفحات والإدارة</button></a><button id="print">طباعة Landscape</button><button id="logout" class="secondary">تسجيل الخروج</button></div></header><main>
+<div class="printinfo" id="printinfo"></div><div class="panel screenonly"><div class="filter"><div class="field"><label>الفترة</label><select id="period"><option value="today">اليوم</option><option value="week">هذا الأسبوع</option><option value="month" selected>هذا الشهر</option><option value="year">هذا العام</option><option value="custom">فترة مخصصة</option></select></div><div class="field"><label>من تاريخ</label><input id="from" type="date"></div><div class="field"><label>إلى تاريخ</label><input id="to" type="date"></div><div><button id="refresh">تحديث المؤشرات</button></div><div><button class="secondary" id="export">تصدير الملخص CSV</button></div></div><p class="sub" id="periodText"></p></div>
+<div id="error" role="alert" class="notice failure" hidden></div>
+<div class="panel"><h2>ملخص الأداء | Executive Summary</h2><div class="cards" id="kpis"></div><div class="mini" id="moreKpis"></div><p class="sub" id="coverage">—</p></div>
+<div class="twocol"><div class="panel"><h2>تطور الحصص والساعات</h2><div class="legend"><span><i class="dot"></i>حصص</span><span><i class="dot alt"></i>ساعات</span></div><div id="trend" class="charts"></div></div>
+<div class="panel"><h2>الإيرادات المستحقة مقابل التحصيلات</h2><div class="legend"><span><i class="dot"></i>قيمة الحصص والخدمات المكتملة</span><span><i class="dot alt"></i>صافي التحصيل</span></div><div id="financeTrend" class="charts"></div></div></div>
+<div class="threecol"><div class="panel"><h2>المواد الأكثر طلبًا</h2><div id="subjects" class="charts"></div></div><div class="panel"><h2>المدرسون الأكثر نشاطًا (بالساعات)</h2><div id="teachers" class="charts"></div></div><div class="panel"><h2>الخدمات الأكثر طلبًا</h2><div id="services" class="charts"></div></div></div>
+<div class="twocol"><div class="panel"><h2>توزيع حالة الحصص</h2><div id="states" class="charts"></div></div></div>
+<details class="details"><summary>تفاصيل إضافية — أفضل المدرسين والمواد والمديونيات</summary><div class="twocol"><div class="panel"><h2>أعلى 10 مدرسين</h2><div class="wrap"><table><thead><tr><th>المدرس</th><th>الحصص</th><th>الساعات</th><th>الطلاب</th><th>قيمة الحصص</th><th>مستحق المدرس</th><th>نصيب المركز</th></tr></thead><tbody id="teacherRows"></tbody></table></div></div><div class="panel"><h2>أعلى 10 مواد</h2><div class="wrap"><table><thead><tr><th>المادة</th><th>الحصص</th><th>الساعات</th><th>الطلاب</th><th>القيمة</th></tr></thead><tbody id="subjectRows"></tbody></table></div></div></div>
+<div class="twocol"><div class="panel"><h2>أعلى أرصدة مستحقة على الطلاب (تقديري)</h2><div class="wrap"><table><thead><tr><th>الطالب</th><th>المستحق</th><th>المدفوع</th><th>الرصيد</th></tr></thead><tbody id="debtRows"></tbody></table></div></div></details><div class="panel"><h2>تنبيهات تنفيذية</h2><ul id="alerts" class="alerts"></ul></div>
+<div class="panel"><h2>حدود البيانات والتفسير</h2><p class="sub">المؤشرات التشغيلية وفق تاريخ الحصة أو الخدمة. المؤشرات المالية النقدية وفق تاريخ الحركة المالية. قيمة النشاط = أسعار الحصص والخدمات المكتملة والمتاحة، ولا تساوي بالضرورة قيمة الفواتير الصادرة. المديونية تقديرية من إجمالي النشاط المسعّر ناقص التحصيلات لنفس الطالب، ولا تحل محل المطابقة على مستوى الفاتورة. نصيب المركز هنا فرق سعر الحصص قبل المصروفات؛ لا يمثل صافي الربح. الأعداد الإجمالية للطلاب والمدرسين تشمل سجلات الأشخاص غير المؤرشفة بصرف النظر عن تاريخ إضافتها. اختلاف التاريخ الزمني للعملات والسجلات القديمة قد يؤثر على دقة المقارنة.</p></div>
+</main></div><script type="module">
+import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.0';
+const sb=createClient('https://uqjoxgcddpwfbjanzqpy.supabase.co',"sb_publishable_-FhtYmDD0qO6mEB2nBE_rQ_j_SE_unY");async function getGrants(client){const{data,error}=await client.from('user_permissions').select('permission');if(error)throw Error(error.message);const allowed=new Set((data||[]).map(x=>x.permission));return key=>allowed.has(key)}
+const $=id=>document.getElementById(id);
+const num=x=>Number(x||0),f=x=>num(x).toLocaleString('ar-QA',{maximumFractionDigits:2}),money=x=>f(x)+' ر.ق';
+const safe=(x)=>String(x||'—');const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Qatar',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+const datestring=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+let state=null;
+function dateBounds(type){const current=today();const [y,m,d]=current.split('-').map(Number);const date=new Date(y,m-1,d);
+ if(type==='today')return[current,current];
+ if(type==='week'){const start=new Date(date);start.setDate(date.getDate()-((date.getDay()+6)%7));return[datestring(start),current]}
+ if(type==='year')return[y+'-01-01',current];
+ return[y+'-'+String(m).padStart(2,'0')+'-01',current]}
+function periodChanged(){if($('period').value!=='custom'){const [start,end]=dateBounds($('period').value);$('from').value=start;$('to').value=end}}
+function inRange(d){return d&&d>=$('from').value&&d<=$('to').value}
+function groupKey(date){if($('period').value==='year'||($('to').value&&$('from').value&&((new Date($('to').value)-new Date($('from').value))/86400000)>90))return date.slice(0,7);return date}
+async function readAll(table,cols){const pageSize=700;let out=[];for(let start=0;start<7000;start+=pageSize){const {data,error}=await sb.from(table).select(cols).range(start,start+pageSize-1);if(error)throw Error(table+': '+error.message);out.push(...data);if(data.length<pageSize)return out}throw Error('عدد سجلات '+table+' تجاوز 7000. لا يمكن عرض مؤشرات ناقصة؛ يلزم تقرير خادمي بترقيم كامل للصفحات.')}
+function el(tag,text,className){const node=document.createElement(tag);if(text!=null)node.textContent=String(text);if(className)node.className=className;return node}
+function tableRows(id,rows,emptyCols){const target=$(id);target.replaceChildren();if(!rows.length){const tr=el('tr');const td=el('td','لا توجد بيانات لهذه الفترة');td.colSpan=emptyCols;tr.append(td);target.append(tr);return}for(const data of rows){const tr=el('tr');for(const value of data)tr.append(el('td',value));target.append(tr)}}
+function bars(id,values,alt=false){const target=$(id);target.replaceChildren();const vals=values.slice(0,8),max=Math.max(1,...vals.map(x=>num(x.value)));
+ if(!vals.length){target.append(el('p','لا توجد بيانات خلال الفترة','empty'));return}
+ for(const item of vals){const row=el('div',null,'chartrow');const label=el('span',item.label);label.title=item.label;const track=el('div',null,'bartrack');const bar=el('div',null,'bar'+(alt?' alt':''));bar.style.width=(100*num(item.value)/max)+'%';track.append(bar);row.append(label,track,el('b',f(item.value)));target.append(row)}}
+function dualBars(id,items){
+ const target=$(id);target.replaceChildren();const data=items.slice(-12);
+ if(!data.length){target.append(el('p','لا توجد بيانات في الفترة','empty'));return}
+ const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');
+ svg.setAttribute('viewBox','0 0 540 170');svg.setAttribute('class','chart-svg');svg.setAttribute('role','img');svg.setAttribute('aria-label','رسم اتجاه '+id);
+ const add=(tag,attrs)=>{const e=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))e.setAttribute(k,v);svg.append(e);return e};
+ const max=Math.max(1,...data.flatMap(x=>[num(x.a),num(x.b)]))*1.1;const x=i=>40+(data.length===1?230:i*480/(data.length-1)),y=v=>134-num(v)*116/max;
+ for(let j=0;j<=3;j++){const py=18+j*116/3;add('line',{x1:40,y1:py,x2:525,y2:py,stroke:'#dfeae3','stroke-width':1});const t=add('text',{x:35,y:py+3,'text-anchor':'end','font-size':10,fill:'#667b6c'});t.textContent=f(max*(3-j)/3)}
+ for(const [field,color] of [['a','#17715c'],['b','#da9d39']]){const points=data.map((d,i)=>x(i)+','+y(d[field])).join(' ');add('polyline',{points,stroke:color,fill:'none','stroke-width':3,'stroke-linejoin':'round'});data.forEach((d,i)=>{const point=add('circle',{cx:x(i),cy:y(d[field]),r:3,fill:color});const title=document.createElementNS(ns,'title');title.textContent=d.label+': '+f(d[field]);point.append(title)})}
+ const ticks=[...new Set([0,Math.floor((data.length-1)/2),data.length-1])];for(const i of ticks){const t=add('text',{x:x(i),y:158,'font-size':10,fill:'#64796d','text-anchor':'middle'});t.textContent=data[i].label}
+ target.append(svg)
+}
+function fillKpis(entries){
+state=entries;const names=['إجمالي الطلاب','عدد الحصص','ساعات التدريس المكتملة','قيمة النشاط المكتمل المسعّر','التحصيلات الصافية للفترة','إجمالي أرصدة الطلاب التقديرية','مستحقات المدرسين للحصص','فرق قيمة النشاط ومستحق المدرسين'];
+const main=names.map(n=>entries.find(e=>e.label===n)).filter(Boolean);$('kpis').replaceChildren();$('moreKpis').replaceChildren();
+for(const e of main){const d=el('div',null,'kpi');d.append(el('span',e.label),el('strong',e.value));$('kpis').append(d)}
+for(const e of entries.filter(x=>!main.includes(x))){const d=el('span');d.append(el('span',e.label),el('b',e.value));$('moreKpis').append(d)}
+}
+function csv(){if(!state)return;const quote=x=>'"'+String(x??'').replace(/"/g,'""')+'"';const csv='\ufeff'+[['المؤشر','القيمة'],...state.map(x=>[x.label,x.value])].map(x=>x.map(quote).join(',')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const a=el('a');a.href=url;a.download='alkhubara-executive-'+$('from').value+'-'+$('to').value+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+async function refresh(){
+ $('error').hidden=true;$('refresh').disabled=true;
+ try{
+ const from=$('from').value,to=$('to').value;if(!from||!to||from>to)throw Error('حدد فترة زمنية صحيحة');
+ const [students,teachers,lessons,services,lr,sp,entries,invoices,allocations]=await Promise.all([
+ readAll('students','id,full_name,is_archived,created_at'),readAll('teachers','id,full_name,is_archived'),
+ readAll('lessons','id,student_id,teacher_id,lesson_date,start_time,hours,subject,status,is_archived'),
+ readAll('educational_services','id,student_id,service_date,service_type,description,status,is_archived'),
+ readAll('lesson_rates','lesson_id,student_hourly_rate,teacher_hourly_rate'),
+ readAll('service_prices','service_id,amount'),
+ readAll('financial_entries','id,entry_date,entry_type,student_id,teacher_id,amount,reverses_entry_id'),
+ readAll('invoices','id,lesson_id,service_id,student_id,amount,issued_at'),
+ readAll('receipt_allocations','id,receipt_id,invoice_id,amount')]);
+ const sn=new Map(students.map(x=>[x.id,x.full_name])),tn=new Map(teachers.map(x=>[x.id,x.full_name]));
+ const lm=new Map(lr.map(x=>[x.lesson_id,x])),sm=new Map(sp.map(x=>[x.service_id,x]));
+ const allActiveLessons=lessons.filter(l=>!l.is_archived),allActiveServices=services.filter(s=>!s.is_archived);
+ const ls=allActiveLessons.filter(l=>inRange(l.lesson_date)),ss=allActiveServices.filter(s=>inRange(s.service_date));
+ const complete=ls.filter(l=>l.status==='completed'),doneServices=ss.filter(s=>s.status==='completed');
+ const subjectMap=new Map(),teacherMap=new Map(),serviceMap=new Map(),studentDue=new Map(),studentCash=new Map(),trend=new Map(),financeTrend=new Map();
+ const bump=(map,key,init)=>{if(!map.has(key))map.set(key,init());return map.get(key)};
+ for(const l of ls){const date=groupKey(l.lesson_date),s=bump(trend,date,()=>({label:date,a:0,b:0}));s.a++;if(l.status==='completed')s.b+=num(l.hours)}
+ let earned=0,teacherEarned=0,unpriced=0;
+ for(const l of complete){const r=lm.get(l.id);if(!r){unpriced++;continue}const revenue=num(l.hours)*num(r.student_hourly_rate),due=num(l.hours)*num(r.teacher_hourly_rate);earned+=revenue;teacherEarned+=due;studentDue.set(l.student_id,(studentDue.get(l.student_id)||0)+revenue);
+ const t=bump(teacherMap,l.teacher_id,()=>({name:tn.get(l.teacher_id)||'غير معروف',count:0,hours:0,students:new Set(),revenue:0,due:0}));t.count++;t.hours+=num(l.hours);t.students.add(l.student_id);t.revenue+=revenue;t.due+=due;
+ const s=bump(subjectMap,l.subject,()=>({name:l.subject,count:0,hours:0,students:new Set(),revenue:0}));s.count++;s.hours+=num(l.hours);s.students.add(l.student_id);s.revenue+=revenue;
+ const day=bump(financeTrend,groupKey(l.lesson_date),()=>({label:groupKey(l.lesson_date),a:0,b:0}));day.a+=revenue;
+ }
+ let unpricedServices=0;
+ for(const s of doneServices){const r=sm.get(s.id);if(!r){unpricedServices++;continue}const value=num(r.amount);earned+=value;studentDue.set(s.student_id,(studentDue.get(s.student_id)||0)+value);const day=bump(financeTrend,groupKey(s.service_date),()=>({label:groupKey(s.service_date),a:0,b:0}));day.a+=value}
+ for(const l of complete){const map=subjectMap.get(l.subject);if(!map){const s=bump(subjectMap,l.subject,()=>({name:l.subject,count:0,hours:0,students:new Set(),revenue:0}));s.count++;s.hours+=num(l.hours);s.students.add(l.student_id)}
+ const tm=teacherMap.get(l.teacher_id);if(!tm){const t=bump(teacherMap,l.teacher_id,()=>({name:tn.get(l.teacher_id)||'غير معروف',count:0,hours:0,students:new Set(),revenue:0,due:0}));t.count++;t.hours+=num(l.hours);t.students.add(l.student_id)}} 
+ for(const s of ss){const x=bump(serviceMap,s.service_type,()=>({count:0}));x.count++}
+ const reversed=new Set(entries.filter(e=>e.entry_type==='reversal').map(e=>e.reverses_entry_id));
+ let receipts=0,expenses=0,teacherPaid=0;
+ for(const e of entries){if(e.entry_type==='reversal'||reversed.has(e.id))continue;if(e.entry_type==='receipt'){studentCash.set(e.student_id,(studentCash.get(e.student_id)||0)+num(e.amount));if(inRange(e.entry_date)){receipts+=num(e.amount);const b=bump(financeTrend,groupKey(e.entry_date),()=>({label:groupKey(e.entry_date),a:0,b:0}));b.b+=num(e.amount)}}
+ if(inRange(e.entry_date)&&e.entry_type==='expense')expenses+=num(e.amount);
+ if(inRange(e.entry_date)&&e.entry_type==='teacher_payment')teacherPaid+=num(e.amount)}
+ const subjects=[...subjectMap.values()].sort((a,b)=>b.count-a.count);
+ const activeTeachers=[...teacherMap.values()].sort((a,b)=>b.hours-a.hours);
+ const debts=students.filter(s=>!s.is_archived).map(s=>({name:s.full_name,due:studentDue.get(s.id)||0,paid:studentCash.get(s.id)||0,balance:(studentDue.get(s.id)||0)-(studentCash.get(s.id)||0)})).filter(x=>x.balance>0).sort((a,b)=>b.balance-a.balance);
+ const studentIds=new Set(complete.map(l=>l.student_id));for(const s of doneServices)studentIds.add(s.student_id);
+ const invoiced=new Set(invoices.map(i=>i.lesson_id||i.service_id));const missingInvoice=complete.filter(l=>lm.has(l.id)&&!invoiced.has(l.id)).length+doneServices.filter(s=>sm.has(s.id)&&!invoiced.has(s.id)).length;
+ const validReceipts=new Map(entries.filter(e=>e.entry_type==='receipt'&&!reversed.has(e.id)).map(e=>[e.id,e]));
+ const allocated=new Map();for(const a of allocations)if(validReceipts.has(a.receipt_id))allocated.set(a.receipt_id,(allocated.get(a.receipt_id)||0)+num(a.amount));
+ const unallocated=[...validReceipts.values()].filter(r=>num(r.amount)>(allocated.get(r.id)||0)+.001);
+ const payStatuses={paid:0,partial:0,unpaid:0};ls.forEach(x=>{if(payStatuses[x.payment_status]!=null)payStatuses[x.payment_status]++});
+ const yearStudents=students.filter(s=>!s.is_archived).length;
+ fillKpis([
+ {label:'إجمالي الطلاب',value:f(yearStudents),note:'غير المؤرشفين'},
+ {label:'طلاب نشطون خلال الفترة',value:f(studentIds.size)},
+ {label:'إجمالي المدرسين',value:f(teachers.filter(t=>!t.is_archived).length)},
+ {label:'المدرسون النشطون',value:f(new Set(complete.map(l=>l.teacher_id)).size)},
+ {label:'عدد المواد',value:f(new Set(ls.map(l=>l.subject)).size),note:'مواد الفترة'},
+ {label:'عدد الحصص',value:f(ls.length)},
+ {label:'ساعات التدريس المكتملة',value:f(complete.reduce((a,l)=>a+num(l.hours),0))},
+ {label:'حصص مكتملة',value:f(complete.length)},
+ {label:'حصص ملغاة',value:f(ls.filter(l=>l.status==='cancelled').length)},
+ {label:'الخدمات التعليمية',value:f(ss.length)},
+ {label:'قيمة النشاط المكتمل المسعّر',value:money(earned),note:'تقديري · ليس فواتير'},
+ {label:'التحصيلات الصافية للفترة',value:money(receipts)},
+ {label:'معدل التحصيل المقارن للنشاط',value:earned>0?f(receipts/earned*100)+'%':'—',note:'مؤشر تقريبي وليس مطابقة فواتير'},
+ {label:'إجمالي أرصدة الطلاب التقديرية',value:money(debts.reduce((a,x)=>a+x.balance,0))},
+ {label:'عدد الطلاب ذوي الرصيد',value:f(debts.length)},
+ {label:'مصروفات المركز',value:money(expenses)},
+ {label:'مستحقات المدرسين للحصص',value:money(teacherEarned),note:'المكتملة المسعّرة'},
+ {label:'المدفوع للمدرسين',value:money(teacherPaid)},
+ {label:'فرق قيمة النشاط ومستحق المدرسين',value:money(earned-teacherEarned),note:'قبل المصروفات ولا يمثل الربح'},
+ {label:'نسبة مستحق المدرسين من النشاط',value:earned>0?f(teacherEarned/earned*100)+'%':'—',note:'تشمل قيمة الخدمات في مقام النسبة'},
+ {label:'نسبة إلغاء الحصص',value:ls.length?f(100*ls.filter(l=>l.status==='cancelled').length/ls.length)+'%':'—'},
+ {label:'متوسط ساعات الحصة المكتملة',value:complete.length?f(complete.reduce((a,l)=>a+num(l.hours),0)/complete.length):'—'}
+ ]);
+ dualBars('trend',[...trend.values()].sort((a,b)=>a.label.localeCompare(b.label)));
+ dualBars('financeTrend',[...financeTrend.values()].sort((a,b)=>a.label.localeCompare(b.label)));
+ bars('subjects',subjects.map(x=>({label:x.name,value:x.count})));
+ bars('teachers',activeTeachers.map(x=>({label:x.name,value:x.hours})));
+ const stypes={homework:'واجبات',research:'أبحاث',project:'مشاريع',other:'أخرى'};
+ bars('services',[...serviceMap.entries()].map(([key,v])=>({label:stypes[key]||key,value:v.count})).sort((a,b)=>b.value-a.value));
+ bars('states',[...new Map(ls.map(x=>[x.status,0])).keys()].map(k=>({label:({scheduled:'مجدولة',confirmed:'مؤكدة',completed:'مكتملة',cancelled:'ملغاة'})[k]||k,value:ls.filter(l=>l.status===k).length})));
+ tableRows('teacherRows',activeTeachers.slice(0,10).map(t=>[t.name,t.count,f(t.hours),t.students.size,money(t.revenue),money(t.due),money(t.revenue-t.due)]),7);
+ tableRows('subjectRows',subjects.slice(0,10).map(s=>[s.name,s.count,f(s.hours),s.students.size,money(s.revenue)]),5);
+ tableRows('debtRows',debts.slice(0,10).map(d=>[d.name,money(d.due),money(d.paid),money(d.balance)]),4);
+ const alerts=[];if(unpriced)alerts.push(unpriced+' حصة مكتملة بدون تسعير');
+ if(unpricedServices)alerts.push(unpricedServices+' خدمة مكتملة بدون تسعير');
+ if(missingInvoice)alerts.push(missingInvoice+' حصة/خدمة مكتملة ومسعرة بدون فاتورة');
+ if(unallocated.length)alerts.push(unallocated.length+' دفعة محصلة غير موزعة بالكامل');
+ if(debts.length)alerts.push(debts.length+' طالب لديهم رصيد تقديري مستحق في نشاط الفترة');
+ if(ls.length&&ls.filter(x=>x.status==='cancelled').length/ls.length>.15)alerts.push('نسبة إلغاء الحصص تتجاوز 15%');
+ const ul=$('alerts');ul.replaceChildren();for(const a of alerts)ul.append(el('li',a));if(!alerts.length)ul.append(el('li','لا توجد تنبيهات مشتقة من البيانات المتاحة'));
+ $('coverage').textContent='آخر تحديث: '+new Date().toLocaleString('ar-QA')+' · تم فحص '+lessons.length+' حصة، '+services.length+' خدمة، '+entries.length+' حركة مالية. · كل المبالغ بالريال القطري.';
+ $('periodText').textContent='الفترة: '+from+' إلى '+to+' · المنطقة الزمنية: قطر · فلاتر المؤشرات حسب تاريخ النشاط';
+ $('printinfo').textContent='مركز الخبراء التعليمي | المؤشرات التنفيذية | '+from+' إلى '+to+' | طُبع '+new Date().toLocaleString('ar-QA');
+ $('export').disabled=false;
+ }catch(error){$('error').hidden=false;$('error').textContent='تعذّر حساب لوحة موثوقة: '+error.message;$('kpis').replaceChildren();state=null;$('export').disabled=true}
+ finally{$('refresh').disabled=false}}
+$('period').onchange=periodChanged;$('from').onchange=()=>{$('period').value='custom'};$('to').onchange=()=>{$('period').value='custom'};$('refresh').onclick=refresh;$('export').onclick=csv;$('print').onclick=()=>window.print();$('logout').onclick=async()=>{await sb.auth.signOut();location.replace('./login.html')};
+(async()=>{try{const{data:{user},error}=await sb.auth.getUser();if(error||!user)throw Error('login');const{data:p,error:pe}=await sb.from('staff_profiles').select('role,is_active').eq('user_id',user.id).single();if(pe||!p?.is_active)throw Error('role');const grant=await getGrants(sb);if(p.role!=='super_admin'&&!grant('executive.view'))throw Error('role');periodChanged();$('gate').remove();$('app').style.display='block';await refresh()}catch(e){location.replace('./dashboard.html')}})();
+</script><script src="./table-enhancements.js" defer></script></body></html>

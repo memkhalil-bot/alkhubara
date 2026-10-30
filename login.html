@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>دخول الموظفين | مركز الخبراء التعليمي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{font-family:Cairo,Tahoma,Arial,sans-serif;color:#18312e;background:#f5f7f6;font-synthesis:none}
+*{box-sizing:border-box}body{margin:0;min-height:100dvh;display:grid;place-items:center;padding:clamp(16px,4vw,40px)}
+main{width:min(100%,450px);background:white;border:1px solid #e1e9e6;border-radius:20px;padding:clamp(22px,5vw,40px);box-shadow:0 16px 50px #0c3d2d12}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:26px}.mark{width:48px;height:48px;display:grid;place-items:center;border-radius:13px;background:#123b38;color:white;font-weight:800;font-size:22px}
+h1{font-size:clamp(23px,5vw,29px);line-height:1.5;margin:0}p{color:#5a6b66;font-size:14px;line-height:1.9;margin:5px 0 23px}
+label{display:block;font-weight:700;font-size:14px;margin:18px 0 7px}input{width:100%;min-height:48px;border:1px solid #cbd8d3;border-radius:10px;padding:11px 13px;font:inherit;font-size:16px;background:#fff;color:#18312e;direction:ltr;text-align:left}
+input:focus{outline:3px solid #9acbb65e;border-color:#247a60}button{width:100%;min-height:49px;margin-top:24px;border:0;border-radius:10px;background:#12604d;color:white;font:700 15px Cairo,Tahoma,Arial,sans-serif;cursor:pointer}
+button:disabled{opacity:.6;cursor:wait}.message{margin-top:16px;font-size:14px;line-height:1.8;min-height:24px}.error{color:#aa2929}.success{color:#12604d}
+footer{margin-top:25px;color:#6d7975;font-size:12px;text-align:center}
+@media(max-width:480px){body{align-items:start;padding-top:10vh}main{border-radius:16px;padding:24px 20px}}
+</style>
+</head>
+<body>
+<main>
+<div class="brand"><div class="mark" aria-hidden="true">خ</div><div><strong>مركز الخبراء التعليمي</strong><div style="font-size:12px;color:#64746e">بوابة الموظفين</div></div></div>
+<h1>تسجيل الدخول</h1><p>ادخل البريد الإلكتروني وكلمة المرور الخاصة بحسابك الوظيفي.</p>
+<form id="login-form">
+<label for="email">البريد الإلكتروني</label><input id="email" type="email" autocomplete="username" inputmode="email" required placeholder="name@example.com">
+<label for="password">كلمة المرور</label><input id="password" type="password" autocomplete="current-password" required>
+<button id="submit" type="submit">دخول</button>
+<div id="message" class="message" role="status" aria-live="polite"></div>
+</form>
+<footer>لإنشاء حساب أو استعادة الوصول، تواصل مع مدير النظام.</footer>
+</main>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.0';
+const form=document.getElementById('login-form');
+const message=document.getElementById('message');
+const button=document.getElementById('submit');
+const url='https://uqjoxgcddpwfbjanzqpy.supabase.co';
+// Supabase publishable key is public by design. This is not a service-role key.
+// Do not activate this screen before configuring the key and backend policies.
+const key="sb_publishable_-FhtYmDD0qO6mEB2nBE_rQ_j_SE_unY";
+form.addEventListener('submit',async event=>{
+ event.preventDefault();message.textContent='';message.className='message';
+ if(!key){message.textContent='تسجيل الدخول قيد الإعداد. تواصل مع مدير النظام.';message.classList.add('error');return;}
+ button.disabled=true;button.textContent='جارٍ التحقق...';
+ try{
+  const supabase=createClient(url,key);
+  const {data,error}=await supabase.auth.signInWithPassword({email:document.getElementById('email').value.trim(),password:document.getElementById('password').value});
+  if(error)throw error;
+  const {data:profile,error:profileError}=await supabase.from('staff_profiles').select('is_active,role').eq('user_id',data.user.id).single();
+  if(profileError||!profile?.is_active){await supabase.auth.signOut();throw new Error('not-authorized');}
+  message.textContent='تم التحقق من الحساب. جارٍ فتح لوحة الموظفين...';message.classList.add('success');location.assign('./dashboard.html');
+ }catch(e){message.textContent='تعذر تسجيل الدخول. تحقق من البيانات أو تواصل مع مدير النظام.';message.classList.add('error');}
+ finally{button.disabled=false;button.textContent='دخول';}
+});
+</script>
+</body></html>

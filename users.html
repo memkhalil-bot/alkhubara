@@ -1,0 +1,60 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>المستخدمون والصلاحيات | الخبراء</title><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet"><style>
+:root{font-family:Cairo,Tahoma,Arial,sans-serif;background:#f5f7f6;color:#183b32}*{box-sizing:border-box}body{margin:0}header{background:#123b38;color:white;padding:15px clamp(15px,3vw,30px);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}h1{margin:0;font-size:23px}header small{color:#ccded4}main{max-width:1150px;margin:auto;padding:clamp(12px,3vw,24px)}.panel{background:white;border:1px solid #dce8df;border-radius:13px;padding:clamp(14px,3vw,22px);margin-bottom:15px}h2{font-size:18px;margin:0 0 10px}.muted{font-size:13px;color:#64766d;line-height:1.8}.notice{border-right:4px solid #c89e40;background:#fff7e9;border-radius:8px;padding:12px;font-size:13px;line-height:1.8;margin-bottom:15px}.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.full{grid-column:1/-1}label{font-size:13px;font-weight:700;display:block;margin-bottom:6px}input:not([type=checkbox]),select{font:inherit;font-size:16px;border:1px solid #c6d9cf;border-radius:9px;padding:9px;min-height:44px;width:100%}input[type=checkbox]{accent-color:#12604d;width:18px;height:18px}button{font:700 14px Cairo,Tahoma,Arial,sans-serif;cursor:pointer;background:#12604d;color:white;padding:9px 16px;min-height:44px;border-radius:9px;border:0}button.secondary{background:#e8f2ed;color:#18553f}button:disabled{opacity:.55;cursor:wait}.perms{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.group{background:#f4f8f4;padding:12px;border-radius:9px;border:1px solid #e4ece5}.group strong{display:block;margin-bottom:8px;font-size:13px}.check{display:flex;align-items:center;gap:8px;margin:7px 0;font-weight:500;font-size:12px}.row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.wrap{overflow:auto}table{border-collapse:collapse;min-width:750px;width:100%}th,td{text-align:right;padding:11px;border-bottom:1px solid #e5eee7;font-size:13px}th{background:#eff6f1}.status{font-size:13px;min-height:26px;color:#12604d}.error{color:#ba3030}.pill{border-radius:30px;background:#e5f3ea;padding:4px 9px;font-size:12px}.inactive{background:#f7e9e7;color:#9d392d}#app{display:none}#gate{text-align:center;margin:15vh auto}a{color:inherit}@media(max-width:900px){.perms{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.perms,.fields{grid-template-columns:1fr}.full{grid-column:auto}}
+</style><style>
+/* Unified title-only header inside the central workspace */
+header{background:transparent!important;color:#193b30!important;box-shadow:none!important;border:0!important;padding:13px 5px 7px!important;min-height:45px!important}
+header h1{color:#193b30!important;font-size:20px!important;margin:0!important;line-height:1.6!important}
+header small,header .toolbar,header>a,header>button,header>div:not(:first-child){display:none!important}
+header>div:first-child small{display:none!important}
+body{background:#f5f7f6}
+</style></head><body><p id="gate">جارٍ التحقق من صلاحيات الإدارة...</p><div id="app"><header><div><h1>المستخدمون والصلاحيات</h1><small>إدارة حسابات موظفي مركز الخبراء</small></div><a href="./dashboard.html"><button class="secondary">العودة للوحة التحكم</button></a></header><main>
+<div class="notice">فقط المدير العام يستطيع إنشاء حسابات أو تغيير الصلاحيات. كلمة المرور المبدئية تُستخدم عند إنشاء الحساب ولا تُخزن أو تُعرض لاحقًا. اختَر أكثر من صلاحية حسب مهام كل موظف. لا تمنح الوصول المالي إلا لمن يحتاجه بالفعل.</div>
+<div class="panel"><h2 id="formTitle">إضافة مستخدم جديد</h2><form id="form"><div class="fields">
+<div><label for="fullName">اسم الموظف</label><input id="fullName" required minlength="2" maxlength="200" autocomplete="name"></div>
+<div><label for="email">الإيميل</label><input id="email" type="email" required autocomplete="email"></div>
+<div id="passwordField"><label for="password">كلمة المرور المبدئية</label><input id="password" type="password" minlength="12" maxlength="128" autocomplete="new-password" required><p class="muted">12 حرفًا على الأقل. أرسلها للموظف بقناة آمنة، واطلب تغييرها عند أول دخول.</p></div>
+<div id="activeField" hidden><label for="active">حالة الحساب</label><select id="active"><option value="true">نشط</option><option value="false">موقوف</option></select></div>
+<div class="full"><h3 style="font-size:15px">صلاحيات الموظف — اختيارات متعددة</h3><div id="permissions" class="perms"></div></div>
+<div class="full row"><div><button type="submit" id="save">إنشاء المستخدم</button><button type="button" id="cancel" class="secondary" hidden>إلغاء التعديل</button></div><p id="formStatus" class="status" aria-live="polite"></p></div>
+</div></form></div>
+<div class="panel"><div class="row"><div><h2>المستخدمون الحاليون</h2><p class="muted">عرض الصلاحيات الممنوحة وحالة الحساب. المدير العام لديه كل الصلاحيات.</p></div><button id="refresh" class="secondary">تحديث</button></div><div class="wrap"><table><thead><tr><th>الاسم</th><th>الإيميل</th><th>نوع الحساب</th><th>الصلاحيات</th><th>الحالة</th><th>الإجراء</th></tr></thead><tbody id="rows"></tbody></table></div><p id="listStatus" class="muted"></p></div>
+</main></div><script type="module">
+import{createClient}from'https://esm.sh/@supabase/supabase-js@2.57.0';
+const sb=createClient('https://uqjoxgcddpwfbjanzqpy.supabase.co',"sb_publishable_-FhtYmDD0qO6mEB2nBE_rQ_j_SE_unY");const $=x=>document.getElementById(x);
+const groups=[
+ ['الطلاب',[['students.view','عرض الطلاب'],['students.edit','إضافة وتعديل الطلاب']]],
+ ['المدرسون',[['teachers.view','عرض المدرسين'],['teachers.edit','إضافة وتعديل المدرسين']]],
+ ['الحصص',[['lessons.view','عرض الحصص'],['lessons.edit','إدارة الحصص']]],
+ ['الخدمات',[['services.view','عرض الخدمات'],['services.edit','إدارة الخدمات']]],
+ ['الحسابات',[['finance.view','عرض التحصيلات والمصروفات'],['finance.edit','تسجيل القيود المالية']]],
+ ['الأسعار',[['pricing.view','عرض الأسعار والمستحقات'],['pricing.edit','تعديل الأسعار']]],
+ ['الفواتير',[['invoices.view','عرض الفواتير'],['invoices.create','إصدار الفواتير'],['invoices.allocate','توزيع التحصيلات']]],
+ ['التقارير',[['reports.view','التقارير التشغيلية'],['audit.view','سجل العمليات'],['executive.view','لوحة المؤشرات التنفيذية']]]
+];
+const labels=Object.fromEntries(groups.flatMap(g=>g[1]));let accounts=[],permissions=[],editing=null,authUser=null;
+const msg=(t,err=false)=>{$('formStatus').textContent=t;$('formStatus').className='status'+(err?' error':'')};
+function permissionsUI(){const root=$('permissions');root.replaceChildren();for(const [name,items] of groups){const group=document.createElement('div');group.className='group';const title=document.createElement('strong');title.textContent=name;group.append(title);for(const [value,label] of items){const wrap=document.createElement('label');wrap.className='check';const input=document.createElement('input');input.type='checkbox';input.value=value;input.name='permission';wrap.append(input,document.createTextNode(label));group.append(wrap)}root.append(group)}}
+function selected(){return [...document.querySelectorAll('input[name="permission"]:checked')].map(x=>x.value)}
+function putSelected(perms){document.querySelectorAll('input[name="permission"]').forEach(x=>x.checked=perms.includes(x.value))}
+function cell(tr,t){const td=document.createElement('td');td.textContent=t;tr.append(td);return td}
+function cancel(){editing=null;$('form').reset();putSelected([]);$('email').disabled=false;$('passwordField').hidden=false;$('password').required=true;$('activeField').hidden=true;$('formTitle').textContent='إضافة مستخدم جديد';$('save').textContent='إنشاء المستخدم';$('cancel').hidden=true;msg('')}
+function startEdit(p){if(p.role==='super_admin'){msg('لا يمكن تعديل صلاحيات المدير العام من هذه الصفحة',true);return}editing=p.user_id;$('fullName').value=p.full_name||'';$('email').value=p.email||'';$('email').disabled=true;$('password').value='';$('password').required=false;$('passwordField').hidden=true;$('activeField').hidden=false;$('active').value=String(p.is_active);putSelected(permissions.filter(x=>x.user_id===p.user_id).map(x=>x.permission));$('formTitle').textContent='تعديل المستخدم: '+p.full_name;$('save').textContent='حفظ الصلاحيات';$('cancel').hidden=false;window.scrollTo({top:0,behavior:'smooth'})}
+async function load(){try{$('listStatus').textContent='جارٍ التحميل...';
+const [p,access]=await Promise.all([sb.from('staff_profiles').select('user_id,full_name,email,role,is_active').order('full_name'),sb.from('user_permissions').select('user_id,permission')]);
+if(p.error||access.error)throw Error((p.error||access.error).message);accounts=p.data||[];permissions=access.data||[];
+$('rows').replaceChildren();for(const account of accounts){const row=document.createElement('tr');cell(row,account.full_name);cell(row,account.email);
+cell(row,account.role==='super_admin'?'مدير عام':'موظف بصلاحيات مخصصة');
+const rights=account.role==='super_admin'?'جميع الصلاحيات':permissions.filter(x=>x.user_id===account.user_id).map(x=>labels[x.permission]).filter(Boolean).join('، ')||'بدون صلاحيات';cell(row,rights);cell(row,account.is_active?'نشط':'موقوف');const actions=document.createElement('td');if(account.role!=='super_admin'){const btn=document.createElement('button');btn.type='button';btn.className='secondary';btn.textContent='تعديل';btn.onclick=()=>startEdit(account);actions.append(btn)}else actions.textContent='محمي';row.append(actions);$('rows').append(row)}$('listStatus').textContent=accounts.length+' مستخدم';
+}catch(e){$('listStatus').textContent='تعذر التحميل: '+e.message}}
+$('form').onsubmit=async e=>{e.preventDefault();const name=$('fullName').value.trim(),mail=$('email').value.trim(),perms=selected();if(name.length<2){msg('الاسم غير صالح',true);return}
+$('save').disabled=true;msg('جارٍ حفظ البيانات...');
+try{if(editing){const {data,error}=await sb.rpc('manage_staff_permissions',{target_user:editing,new_permissions:perms,new_full_name:name,enabled:$('active').value==='true'});if(error)throw Error(error.message);msg('تم تحديث الصلاحيات والحالة')}
+else{const {data:{session},error:se}=await sb.auth.getSession();if(se||!session)throw Error('أعد تسجيل الدخول');
+const res=await fetch('https://uqjoxgcddpwfbjanzqpy.supabase.co/functions/v1/staff-create',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token,'apikey':"sb_publishable_-FhtYmDD0qO6mEB2nBE_rQ_j_SE_unY"},body:JSON.stringify({full_name:name,email:mail,password:$('password').value,permissions:perms})});const body=await res.json();if(!res.ok)throw Error(body.error||'تعذر إنشاء الحساب');msg('تم إنشاء حساب '+mail)}
+const success=editing?'تم تحديث بيانات الموظف وصلاحياته':'تم إنشاء المستخدم '+mail+' بنجاح';cancel();msg(success);await load()}catch(e){msg('فشل حفظ المستخدم: '+e.message,true)}finally{$('save').disabled=false}};
+$('cancel').onclick=cancel;$('refresh').onclick=load;
+(async()=>{try{const{data:{user},error}=await sb.auth.getUser();if(error||!user)throw Error('login');authUser=user;
+const{data:p,error:pe}=await sb.from('staff_profiles').select('role,is_active').eq('user_id',user.id).single();
+if(pe||p?.role!=='super_admin'||!p.is_active)throw Error('forbidden');
+permissionsUI();$('gate').remove();$('app').style.display='block';await load()}catch(e){location.replace('./dashboard.html')}})();
+</script><script src="./table-enhancements.js" defer></script></body></html>
