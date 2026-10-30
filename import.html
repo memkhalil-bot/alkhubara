@@ -112,4 +112,4 @@ $('import').onclick=async()=>{
  finally{$('preview').disabled=false}
 };
 (async()=>{try{const {data:{user},error}=await sb.auth.getUser();if(error||!user)throw Error('login');uid=user.id;const {data:p,error:pe}=await sb.from('staff_profiles').select('role,is_active').eq('user_id',uid).single();if(pe||!p?.is_active)throw Error('role');role=p.role;const {data:a,error:ae}=await sb.from('user_permissions').select('permission');if(ae)throw Error(ae.message);grants=new Set((a||[]).map(x=>x.permission));if(!allow('students.edit')&&!allow('teachers.edit'))throw Error('permission');$('gate').remove();$('app').style.display='block'}catch(e){location.replace('./dashboard.html')}})();
-</script></body></html>
+</script><script src="./table-enhancements.js" defer></script></body></html>
