@@ -22,7 +22,7 @@ h2{margin:0 0 8px;font-size:20px}p{line-height:1.9;color:#526862}button{font:700
 <div class="grid">
 <div class="tile"><strong>الطلاب والمدرسون</strong><span>إدارة السجلات، البحث، والتعديل والأرشفة</span><p><a href="./people.html">فتح وحدة الطلاب والمدرسين ←</a></p></div>
 <div class="tile"><strong>الحصص والخدمات</strong><span>إضافة وتعديل وأرشفة الحصص والخدمات التعليمية</span><p><a href="./operations.html">فتح الحصص والخدمات ←</a></p></div>
-<div class="tile" id="financeTile" style="display:none"><strong>الحسابات المالية</strong><span>التحصيلات والمصروفات وصرف المدرسين</span><p><a href="./finance.html">فتح دفتر الحركات المالية ←</a></p></div><div class="tile" id="pricingTile" style="display:none"><strong>التسعير ومستحقات المدرسين</strong><span>أسعار الحصص والخدمات واحتساب مستحقات المدرسين</span><p><a href="./pricing.html">فتح التسعير والمستحقات ←</a></p></div><div class="tile" id="invoicesTile" style="display:none"><strong>الفواتير والمطابقة</strong><span>إصدار الفواتير وربط التحصيلات</span><p><a href="./invoices.html">فتح الفواتير والمطابقة ←</a></p></div><div class="tile"><strong>التقارير وسجل العمليات</strong><span>قيد ربط الصلاحيات والسجلات</span></div>
+<div class="tile" id="financeTile" style="display:none"><strong>الحسابات المالية</strong><span>التحصيلات والمصروفات وصرف المدرسين</span><p><a href="./finance.html">فتح دفتر الحركات المالية ←</a></p></div><div class="tile" id="pricingTile" style="display:none"><strong>التسعير ومستحقات المدرسين</strong><span>أسعار الحصص والخدمات واحتساب مستحقات المدرسين</span><p><a href="./pricing.html">فتح التسعير والمستحقات ←</a></p></div><div class="tile" id="invoicesTile" style="display:none"><strong>الفواتير والمطابقة</strong><span>إصدار الفواتير وربط التحصيلات</span><p><a href="./invoices.html">فتح الفواتير والمطابقة ←</a></p></div><div class="tile" id="balancesTile" style="display:none"><strong>أرصدة الطلاب والمدرسين</strong><span>تقرير مستحق ومدفوع ومتبقي لكل طرف</span><p><a href="./balances.html">فتح تقرير الأرصدة ←</a></p></div><div class="tile"><strong>التقارير وسجل العمليات</strong><span>قيد ربط الصلاحيات والسجلات</span></div>
 </div>
 </main></div>
 <script type="module">
@@ -40,6 +40,7 @@ async function check(){
   document.getElementById('financeTile').style.display=['accountant','admin','super_admin'].includes(profile.role)?'block':'none';
   document.getElementById('pricingTile').style.display=['accountant','admin','super_admin'].includes(profile.role)?'block':'none';
   document.getElementById('invoicesTile').style.display=['accountant','admin','super_admin'].includes(profile.role)?'block':'none';
+  document.getElementById('balancesTile').style.display=['accountant','admin','super_admin'].includes(profile.role)?'block':'none';
   document.getElementById('email').textContent=user.email||'';
   state.hidden=true;app.style.display='block';
  }catch(e){location.replace('./login.html');}
