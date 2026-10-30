@@ -20,8 +20,9 @@ table{border-collapse:collapse;min-width:800px;width:100%}th,td{padding:11px;tex
 <script type="module">
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.0';
 const supabase=createClient('https://uqjoxgcddpwfbjanzqpy.supabase.co',"sb_publishable_-FhtYmDD0qO6mEB2nBE_rQ_j_SE_unY");
+async function getGrants(client){const{data,error}=await client.from('user_permissions').select('permission');if(error)throw Error(error.message);const allowed=new Set((data||[]).map(x=>x.permission));return key=>allowed.has(key)}
 const $=id=>document.getElementById(id),money=n=>Number(n||0).toLocaleString('ar-QA',{minimumFractionDigits:2,maximumFractionDigits:2});
-let kind='lessons',uid='',role='',items=[],rates=[],students=[],teachers=[];
+let grant=()=>false;let kind='lessons',uid='',role='',items=[],rates=[],students=[],teachers=[];
 const eligible=new Set(['accountant','admin','super_admin']);
 const msg=(s,err=false)=>{$('msg').textContent=s;$('msg').className='msg '+(err?'error':'success')};
 const name=(arr,id)=>arr.find(v=>v.id===id)?.full_name||'—';
@@ -54,7 +55,7 @@ async function load(){
 $('item').addEventListener('change',()=>{const r=rates.find(p=>(kind==='lessons'?p.lesson_id:p.service_id)===$('item').value);$('studentRate').value=r?(kind==='lessons'?r.student_hourly_rate:r.amount):'';$('teacherRate').value=r?.teacher_hourly_rate??''});
 async function switchKind(next){kind=next;$('lessonsBtn').className=next==='lessons'?'selected':'secondary';$('servicesBtn').className=next==='educational_services'?'selected':'secondary';await load()}
 $('lessonsBtn').onclick=()=>switchKind('lessons');$('servicesBtn').onclick=()=>switchKind('educational_services');
-$('save').addEventListener('click',async()=>{if(!['admin','super_admin'].includes(role))return;const id=$('item').value;
+$('save').addEventListener('click',async()=>{if(role!=='super_admin'&&!grant('pricing.edit'))return;const id=$('item').value;
  const student=Number($('studentRate').value),teacher=Number($('teacherRate').value);
  if(!id||!$('studentRate').value||!Number.isFinite(student)||student<0||student>1000000||(kind==='lessons'&&(!$('teacherRate').value||!Number.isFinite(teacher)||teacher<0||teacher>1000000))){msg('اختر السجل وأدخل الأسعار بشكل صحيح.',true);return}
  $('save').disabled=true;const isLesson=kind==='lessons';
@@ -69,11 +70,11 @@ $('save').addEventListener('click',async()=>{if(!['admin','super_admin'].include
 $('logout').addEventListener('click',async()=>{await supabase.auth.signOut();location.replace('./login.html')});
 (async()=>{try{const {data:{user},error}=await supabase.auth.getUser();if(error||!user)throw Error('signin');uid=user.id;
  const {data:profile,error:pe}=await supabase.from('staff_profiles').select('role,is_active').eq('user_id',uid).single();
- if(pe||!profile?.is_active||!eligible.has(profile.role))throw Error('permission');role=profile.role;
+ if(pe||!profile?.is_active)throw Error('permission');role=profile.role;grant=await getGrants(supabase);if(role!=='super_admin'&&!grant('pricing.view')&&!grant('pricing.edit'))throw Error('permission');
  const [s,t]=await Promise.all([supabase.from('students').select('id,full_name').limit(1000),supabase.from('teachers').select('id,full_name').limit(1000)]);
  if(s.error||t.error)throw Error('lookup');
- students=s.data||[];teachers=t.data||[];$('save').hidden=!['admin','super_admin'].includes(role);
- if(role==='accountant'){$('permissions').textContent=' · صلاحية المحاسب: عرض فقط';$('studentRate').disabled=true;$('teacherRate').disabled=true;$('item').disabled=true}
+ students=s.data||[];teachers=t.data||[];$('save').hidden=role!=='super_admin'&&!grant('pricing.edit');
+ if(role!=='super_admin'&&!grant('pricing.edit')){$('permissions').textContent=' · صلاحية المحاسب: عرض فقط';$('studentRate').disabled=true;$('teacherRate').disabled=true;$('item').disabled=true}
  $('gate').hidden=true;$('app').style.display='block';await load()
  }catch(e){location.replace('./dashboard.html')}})();
 </script></body></html>
