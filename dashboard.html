@@ -13,7 +13,7 @@ let profile=null,rights=new Set(),items=[],active='';
 const groups=[
  ['الرئيسية',[['executive','المؤشرات التنفيذية','executive.html','▤',['executive.view']]]],
  ['الإدارة التعليمية',[['people','الطلاب والمدرسون','people.html','♙',['students.view','students.edit','teachers.view','teachers.edit']],['operations','الحصص والخدمات','operations.html','▦',['lessons.view','lessons.edit','services.view','services.edit']],['import','استيراد Excel','import.html','⇧',['students.edit','teachers.edit']]]],
- ['الإدارة المالية',[['finance','التحصيلات والمصروفات','finance.html','◈',['finance.view','finance.edit']],['pricing','التسعير والمستحقات','pricing.html','%', ['pricing.view','pricing.edit']],['invoices','الفواتير والمطابقة','invoices.html','▧',['invoices.view','invoices.create','invoices.allocate']],['balances','أرصدة الطلاب والمدرسين','balances.html','≋',['finance.view','finance.edit']]]],
+ ['الإدارة المالية',[['finance','الإيرادات والمصروفات','finance.html','◈',['finance.view','finance.edit']],['pricing','التسعير والمستحقات','pricing.html','%', ['pricing.view','pricing.edit']],['invoices','الفواتير والمطابقة','invoices.html','▧',['invoices.view','invoices.create','invoices.allocate']],['balances','أرصدة الطلاب والمدرسين','balances.html','≋',['finance.view','finance.edit']]]],
  ['التقارير والإدارة',[['reports','التقارير وسجل العمليات','reports.html','▥',['reports.view','audit.view']],['users','المستخدمون والصلاحيات','users.html','⚙',['__super_admin']]]]
 ];
 function permitted(entry){return profile.role==='super_admin'||entry[4].some(k=>rights.has(k))}
