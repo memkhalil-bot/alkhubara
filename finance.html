@@ -44,7 +44,8 @@ button.secondary{background:#e8f2eb;color:#1a5140}button:disabled{opacity:.55;cu
 <script type="module">
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.0';
 const supabase=createClient('https://uqjoxgcddpwfbjanzqpy.supabase.co',"sb_publishable_-FhtYmDD0qO6mEB2nBE_rQ_j_SE_unY");
-const $=id=>document.getElementById(id);let uid='',students=[],teachers=[],entries=[];
+async function getGrants(client){const{data,error}=await client.from('user_permissions').select('permission');if(error)throw Error(error.message);const allowed=new Set((data||[]).map(x=>x.permission));return key=>allowed.has(key)}
+const $=id=>document.getElementById(id);let uid='',students=[],teachers=[],entries=[],role='',grant=()=>false;
 const labels={receipt:'تحصيل',expense:'مصروف',teacher_payment:'صرف مدرس',reversal:'قيد عكسي'};
 const roleLabels={accountant:'محاسب',admin:'مدير',super_admin:'مدير عام'};
 const money=v=>Number(v||0).toLocaleString('ar-QA',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -72,7 +73,7 @@ async function load(){
  $('receipts').textContent=money(totals.receipt);$('expenses').textContent=money(totals.expense);$('teachersPaid').textContent=money(totals.teacher_payment);
  if(!entries.length){const tr=document.createElement('tr');const td=cell(tr,'لا توجد حركات مالية بعد');td.colSpan=7;$('rows').append(tr)}
  for(const e of entries){const tr=document.createElement('tr');cell(tr,e.entry_date);cell(tr,labels[e.entry_type]||e.entry_type);cell(tr,e.entry_type==='receipt'?person(students,e.student_id):e.entry_type==='teacher_payment'?person(teachers,e.teacher_id):'—');cell(tr,e.category);cell(tr,(e.entry_type==='reversal'?'-':'')+money(e.amount));cell(tr,e.reference_number);
-  const td=document.createElement('td');if(e.entry_type!=='reversal'&&!reversed.has(e.id)){
+  const td=document.createElement('td');if((role==='super_admin'||grant('finance.edit'))&&e.entry_type!=='reversal'&&!reversed.has(e.id)){
    const b=document.createElement('button');b.type='button';b.className='secondary';b.textContent='عكس القيد';b.addEventListener('click',()=>reverse(e,b));td.append(b)
   }else td.textContent=e.entry_type==='reversal'?'تصحيح':'معكوس';tr.append(td);$('rows').append(tr)}
 }
@@ -99,8 +100,8 @@ $('logout').addEventListener('click',async()=>{await supabase.auth.signOut();loc
 (async()=>{try{
  const {data:{user},error}=await supabase.auth.getUser();if(error||!user)throw Error('no-session');uid=user.id;
  const {data:profile,error:pe}=await supabase.from('staff_profiles').select('full_name,role,is_active').eq('user_id',uid).single();
- if(pe||!profile?.is_active||!roleLabels[profile.role])throw Error('unauthorized');
- $('who').textContent=(profile.full_name||user.email)+' · '+roleLabels[profile.role];
+ if(pe||!profile?.is_active)throw Error('unauthorized');grant=await getGrants(supabase);role=profile.role;if(profile.role!=='super_admin'&&!grant('finance.view')&&!grant('finance.edit'))throw Error('unauthorized');
+ $('who').textContent=(profile.full_name||user.email)+' · '+(roleLabels[profile.role]||'موظف مالي');$('form').hidden=profile.role!=='super_admin'&&!grant('finance.edit');
  $('state').hidden=true;$('app').style.display='block';$('entry_date').value=new Date().toLocaleDateString('en-CA');setType();await loadPeople();await load();
  }catch(e){location.replace('./dashboard.html')}})();
 </script></body></html>
