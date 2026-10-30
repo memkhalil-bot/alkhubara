@@ -23,7 +23,7 @@ main{max-width:1440px;padding:13px 20px}.panel{padding:13px 15px;margin-bottom:1
 <div class="threecol"><div class="panel"><h2>المواد الأكثر طلبًا</h2><div id="subjects" class="charts"></div></div><div class="panel"><h2>المدرسون الأكثر نشاطًا (بالساعات)</h2><div id="teachers" class="charts"></div></div><div class="panel"><h2>الخدمات الأكثر طلبًا</h2><div id="services" class="charts"></div></div></div>
 <div class="twocol"><div class="panel"><h2>توزيع حالة الحصص</h2><div id="states" class="charts"></div></div></div>
 <details class="details"><summary>تفاصيل إضافية — أفضل المدرسين والمواد والمديونيات</summary><div class="twocol"><div class="panel"><h2>أعلى 10 مدرسين</h2><div class="wrap"><table><thead><tr><th>المدرس</th><th>الحصص</th><th>الساعات</th><th>الطلاب</th><th>قيمة الحصص</th><th>مستحق المدرس</th><th>نصيب المركز</th></tr></thead><tbody id="teacherRows"></tbody></table></div></div><div class="panel"><h2>أعلى 10 مواد</h2><div class="wrap"><table><thead><tr><th>المادة</th><th>الحصص</th><th>الساعات</th><th>الطلاب</th><th>القيمة</th></tr></thead><tbody id="subjectRows"></tbody></table></div></div></div>
-<div class="twocol"><div class="panel"><h2>أعلى أرصدة مستحقة على الطلاب (تقديري)</h2><div class="wrap"><table><thead><tr><th>الطالب</th><th>المستحق</th><th>المدفوع</th><th>الرصيد</th></tr></thead><tbody id="debtRows"></tbody></table></div></div><div class="panel"><h2>تنبيهات تنفيذية</h2><ul id="alerts" class="alerts"></ul></div></div></details>
+<div class="twocol"><div class="panel"><h2>أعلى أرصدة مستحقة على الطلاب (تقديري)</h2><div class="wrap"><table><thead><tr><th>الطالب</th><th>المستحق</th><th>المدفوع</th><th>الرصيد</th></tr></thead><tbody id="debtRows"></tbody></table></div></div></details><div class="panel"><h2>تنبيهات تنفيذية</h2><ul id="alerts" class="alerts"></ul></div>
 <div class="panel"><h2>حدود البيانات والتفسير</h2><p class="sub">المؤشرات التشغيلية وفق تاريخ الحصة أو الخدمة. المؤشرات المالية النقدية وفق تاريخ الحركة المالية. قيمة النشاط = أسعار الحصص والخدمات المكتملة والمتاحة، ولا تساوي بالضرورة قيمة الفواتير الصادرة. المديونية تقديرية من إجمالي النشاط المسعّر ناقص التحصيلات لنفس الطالب، ولا تحل محل المطابقة على مستوى الفاتورة. نصيب المركز هنا فرق سعر الحصص قبل المصروفات؛ لا يمثل صافي الربح. الأعداد الإجمالية للطلاب والمدرسين تشمل سجلات الأشخاص غير المؤرشفة بصرف النظر عن تاريخ إضافتها. اختلاف التاريخ الزمني للعملات والسجلات القديمة قد يؤثر على دقة المقارنة.</p></div>
 </main></div><script type="module">
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.0';
@@ -46,8 +46,18 @@ function tableRows(id,rows,emptyCols){const target=$(id);target.replaceChildren(
 function bars(id,values,alt=false){const target=$(id);target.replaceChildren();const vals=values.slice(0,8),max=Math.max(1,...vals.map(x=>num(x.value)));
  if(!vals.length){target.append(el('p','لا توجد بيانات خلال الفترة','empty'));return}
  for(const item of vals){const row=el('div',null,'chartrow');const label=el('span',item.label);label.title=item.label;const track=el('div',null,'bartrack');const bar=el('div',null,'bar'+(alt?' alt':''));bar.style.width=(100*num(item.value)/max)+'%';track.append(bar);row.append(label,track,el('b',f(item.value)));target.append(row)}}
-function dualBars(id,items){const target=$(id);target.replaceChildren();const limited=items.slice(-12),max=Math.max(1,...limited.flatMap(x=>[x.a,x.b]));if(!limited.length){target.append(el('p','لا توجد بيانات لهذه الفترة','empty'));return}
- for(const item of limited){const r=el('div',null,'chartrow');r.append(el('span',item.label));const box=el('div');for(const [val,cls] of [[item.a,'bar'],[item.b,'bar alt']]){const track=el('div',null,'bartrack');track.style.margin='3px 0';const bar=el('div',null,cls);bar.style.width=(100*val/max)+'%';track.append(bar);box.append(track)}r.append(box,el('b',f(item.a)+' / '+f(item.b)));target.append(r)}}
+function dualBars(id,items){
+ const target=$(id);target.replaceChildren();const data=items.slice(-12);
+ if(!data.length){target.append(el('p','لا توجد بيانات في الفترة','empty'));return}
+ const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');
+ svg.setAttribute('viewBox','0 0 540 170');svg.setAttribute('class','chart-svg');svg.setAttribute('role','img');svg.setAttribute('aria-label','رسم اتجاه '+id);
+ const add=(tag,attrs)=>{const e=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))e.setAttribute(k,v);svg.append(e);return e};
+ const max=Math.max(1,...data.flatMap(x=>[num(x.a),num(x.b)]))*1.1;const x=i=>40+(data.length===1?230:i*480/(data.length-1)),y=v=>134-num(v)*116/max;
+ for(let j=0;j<=3;j++){const py=18+j*116/3;add('line',{x1:40,y1:py,x2:525,y2:py,stroke:'#dfeae3','stroke-width':1});const t=add('text',{x:35,y:py+3,'text-anchor':'end','font-size':10,fill:'#667b6c'});t.textContent=f(max*(3-j)/3)}
+ for(const [field,color] of [['a','#17715c'],['b','#da9d39']]){const points=data.map((d,i)=>x(i)+','+y(d[field])).join(' ');add('polyline',{points,stroke:color,fill:'none','stroke-width':3,'stroke-linejoin':'round'});data.forEach((d,i)=>{const point=add('circle',{cx:x(i),cy:y(d[field]),r:3,fill:color});const title=document.createElementNS(ns,'title');title.textContent=d.label+': '+f(d[field]);point.append(title)})}
+ const ticks=[...new Set([0,Math.floor((data.length-1)/2),data.length-1])];for(const i of ticks){const t=add('text',{x:x(i),y:158,'font-size':10,fill:'#64796d','text-anchor':'middle'});t.textContent=data[i].label}
+ target.append(svg)
+}
 function fillKpis(entries){
 state=entries;const names=['إجمالي الطلاب','عدد الحصص','ساعات التدريس المكتملة','قيمة النشاط المكتمل المسعّر','التحصيلات الصافية للفترة','إجمالي أرصدة الطلاب التقديرية','مستحقات المدرسين للحصص','فرق قيمة النشاط ومستحق المدرسين'];
 const main=names.map(n=>entries.find(e=>e.label===n)).filter(Boolean);$('kpis').replaceChildren();$('moreKpis').replaceChildren();
