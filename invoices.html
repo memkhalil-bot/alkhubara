@@ -38,4 +38,4 @@ $('allocate').onclick=async()=>{const r=receipts.find(x=>x.id===$('receipt').val
 $('allocate').disabled=true;const{error}=await db.from('receipt_allocations').insert({receipt_id:r.id,invoice_id:i.id,amount,created_by:userId});$('allocate').disabled=false;if(error)msg('فشل التوزيع: '+error.message);else await load()};
 $('refresh').onclick=load;
 (async()=>{try{const{data:{user},error}=await db.auth.getUser();if(error||!user)throw Error('auth');userId=user.id;const{data:p}=await db.from('staff_profiles').select('role,is_active').eq('user_id',user.id).single();if(!p?.is_active||!(await allowed('invoices.view')||await allowed('invoices.create')||await allowed('invoices.allocate')))throw Error('role');role=p.role;$('issueBox').hidden=!(await allowed('invoices.create'));$('allocate').hidden=!(await allowed('invoices.allocate'));$('state').remove();$('app').style.display='block';await load()}catch(e){location.replace('./dashboard.html')}})();
-</script></body></html>
+</script><script src="./table-enhancements.js" defer></script></body></html>
