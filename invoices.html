@@ -21,11 +21,11 @@ query('students','id,full_name'),query('lessons','id,student_id,hours,subject,st
 students=s;invoices=inv;entries=fin;allocations=al;const done=new Set(inv.map(i=>i.lesson_id||i.service_id));const lessonRates=new Map(lr.map(x=>[x.lesson_id,x])),serviceRates=new Map(spr.map(x=>[x.service_id,x]));
 sources=[...ls.filter(x=>x.status==='completed'&&!x.is_archived&&!done.has(x.id)&&lessonRates.has(x.id)).map(x=>({id:x.id,student_id:x.student_id,type:'lesson',label:'حصة '+x.subject,amount:Number(x.hours)*Number(lessonRates.get(x.id).student_hourly_rate)})),
 ...sv.filter(x=>x.status==='completed'&&!x.is_archived&&!done.has(x.id)&&serviceRates.has(x.id)).map(x=>({id:x.id,student_id:x.student_id,type:'service',label:'خدمة '+x.description,amount:Number(serviceRates.get(x.id).amount)}))].filter(x=>x.amount>0);
-$('source').replaceChildren();option($('source','','اختر الحصة أو الخدمة');sources.forEach(x=>option($('source'),x.id,x.label+' — '+name(x.student_id)));
+$('source').replaceChildren();option($('source'),'','اختر الحصة أو الخدمة');sources.forEach(x=>option($('source'),x.id,x.label+' — '+name(x.student_id)));
 const reversed=new Set(fin.filter(x=>x.entry_type==='reversal').map(x=>x.reverses_entry_id));
 receipts=fin.filter(x=>x.entry_type==='receipt'&&!reversed.has(x.id));
-$('receipt').replaceChildren();option($('receipt','','اختر الدفعة');receipts.forEach(x=>option($('receipt'),x.id,name(x.student_id)+' — '+m(x.amount)));
-$('invoice').replaceChildren();option($('invoice','','اختر الفاتورة');
+$('receipt').replaceChildren();option($('receipt'),'','اختر الدفعة');receipts.forEach(x=>option($('receipt'),x.id,name(x.student_id)+' — '+m(x.amount)));
+$('invoice').replaceChildren();option($('invoice'),'','اختر الفاتورة');
 for(const i of invoices){const allocated=al.filter(a=>a.invoice_id===i.id&&!reversed.has(a.receipt_id)).reduce((n,a)=>n+Number(a.amount),0);if(i.amount>allocated)option($('invoice'),i.id,'#'+i.invoice_no+' — '+name(i.student_id)+' — متبقٍ '+m(i.amount-allocated))}
 $('rows').replaceChildren();for(const i of invoices){const paid=al.filter(a=>a.invoice_id===i.id&&!reversed.has(a.receipt_id)).reduce((n,a)=>n+Number(a.amount),0),tr=document.createElement('tr');[i.invoice_no,name(i.student_id),i.issued_at.slice(0,10),m(i.amount),m(paid),m(i.amount-paid)].forEach(v=>cell(tr,v));$('rows').append(tr)}msg('عدد الفواتير: '+invoices.length);
 $('source').dispatchEvent(new Event('change'));
