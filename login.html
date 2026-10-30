@@ -32,14 +32,14 @@ footer{margin-top:25px;color:#6d7975;font-size:12px;text-align:center}
 <footer>لإنشاء حساب أو استعادة الوصول، تواصل مع مدير النظام.</footer>
 </main>
 <script type="module">
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.0';
 const form=document.getElementById('login-form');
 const message=document.getElementById('message');
 const button=document.getElementById('submit');
 const url='https://uqjoxgcddpwfbjanzqpy.supabase.co';
 // Supabase publishable key is public by design. This is not a service-role key.
 // Do not activate this screen before configuring the key and backend policies.
-const key=window.EXPERTS_SUPABASE_PUBLISHABLE_KEY;
+const key="sb_publishable_-FhtYmDD0qO6mEB2nBE_rQ_j_SE_unY";
 form.addEventListener('submit',async event=>{
  event.preventDefault();message.textContent='';message.className='message';
  if(!key){message.textContent='تسجيل الدخول قيد الإعداد. تواصل مع مدير النظام.';message.classList.add('error');return;}
