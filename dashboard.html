@@ -18,11 +18,11 @@ h2{margin:0 0 8px;font-size:20px}p{line-height:1.9;color:#526862}button{font:700
 <header><div><h1>🎓 مركز الخبراء التعليمي</h1><div class="sub">لوحة الموظفين — نسخة تجريبية آمنة للدخول</div></div><button id="logout">تسجيل الخروج</button></header>
 <main>
 <div class="card"><span class="pill" id="role">موظف</span><h2 id="greeting" style="margin-top:12px">مرحبًا</h2><p id="email"></p>
-<div class="notice">تم ربط وحدة الطلاب والمدرسين بقاعدة البيانات مع الصلاحيات. تم ربط الحصص والخدمات أيضًا. المدفوعات والتسعير ما زالت غير مفعلة حتى اكتمال الحماية المالية.</div></div>
+<div class="notice">تم ربط وحدة الطلاب والمدرسين بقاعدة البيانات مع الصلاحيات. تم ربط الحصص والخدمات ودفتر القيود المالية، ببيانات اختبارية فقط حاليًا. التسعير ومستحقات المدرسين المحسوبة تلقائيًا قيد التطوير.</div></div>
 <div class="grid">
 <div class="tile"><strong>الطلاب والمدرسون</strong><span>إدارة السجلات، البحث، والتعديل والأرشفة</span><p><a href="./people.html">فتح وحدة الطلاب والمدرسين ←</a></p></div>
 <div class="tile"><strong>الحصص والخدمات</strong><span>إضافة وتعديل وأرشفة الحصص والخدمات التعليمية</span><p><a href="./operations.html">فتح الحصص والخدمات ←</a></p></div>
-<div class="tile"><strong>التقارير وسجل العمليات</strong><span>قيد ربط الصلاحيات والسجلات</span></div>
+<div class="tile" id="financeTile" style="display:none"><strong>الحسابات المالية</strong><span>التحصيلات والمصروفات وصرف المدرسين</span><p><a href="./finance.html">فتح دفتر الحركات المالية ←</a></p></div><div class="tile"><strong>التقارير وسجل العمليات</strong><span>قيد ربط الصلاحيات والسجلات</span></div>
 </div>
 </main></div>
 <script type="module">
@@ -37,6 +37,7 @@ async function check(){
   if(pe||!profile?.is_active||!labels[profile.role]){await supabase.auth.signOut();throw Error('unauthorized');}
   document.getElementById('greeting').textContent='مرحبًا، '+profile.full_name;
   document.getElementById('role').textContent=labels[profile.role];
+  document.getElementById('financeTile').style.display=['accountant','admin','super_admin'].includes(profile.role)?'block':'none';
   document.getElementById('email').textContent=user.email||'';
   state.hidden=true;app.style.display='block';
  }catch(e){location.replace('./login.html');}
