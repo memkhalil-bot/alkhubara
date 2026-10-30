@@ -8,6 +8,7 @@
 </main></div><script type="module">
 import{createClient}from'https://esm.sh/@supabase/supabase-js@2.57.0';
 const db=createClient('https://uqjoxgcddpwfbjanzqpy.supabase.co',"sb_publishable_-FhtYmDD0qO6mEB2nBE_rQ_j_SE_unY");
+async function allowed(k){const {data,error}=await db.rpc('has_staff_permission',{permission_key:k});if(error)throw Error(error.message);return data===true}
 const $=id=>document.getElementById(id);let userId='',role='',students=[],sources=[],invoices=[],receipts=[],allocations=[],entries=[];
 const m=n=>Number(n||0).toLocaleString('ar-QA',{minimumFractionDigits:2,maximumFractionDigits:2}),name=id=>students.find(x=>x.id===id)?.full_name||'—';
 function option(s,value,label){const o=document.createElement('option');o.value=value;o.textContent=label;s.append(o)}
@@ -30,11 +31,11 @@ $('rows').replaceChildren();for(const i of invoices){const paid=al.filter(a=>a.i
 $('source').dispatchEvent(new Event('change'));
 }catch(e){msg('تعذر عرض التقرير: '+e.message)}}
 $('source').addEventListener('change',()=>{const x=sources.find(x=>x.id===$('source').value);$('student').value=x?name(x.student_id):'';$('expected').value=x?m(x.amount):''});
-$('issue').onclick=async()=>{if(!['admin','super_admin'].includes(role))return;const x=sources.find(x=>x.id===$('source').value);if(!x)return; $('issue').disabled=true;
+$('issue').onclick=async()=>{if(!(await allowed('invoices.create')))return;const x=sources.find(x=>x.id===$('source').value);if(!x)return; $('issue').disabled=true;
 const data={student_id:x.student_id,amount:x.amount,created_by:userId,...(x.type==='lesson'?{lesson_id:x.id}:{service_id:x.id})};const{error}=await db.from('invoices').insert(data);
 $('issue').disabled=false;if(error)msg('فشل إصدار الفاتورة: '+error.message);else await load()};
 $('allocate').onclick=async()=>{const r=receipts.find(x=>x.id===$('receipt').value),i=invoices.find(x=>x.id===$('invoice').value),amount=Number($('allocAmount').value);if(!r||!i||!Number.isFinite(amount)||amount<=0){msg('اختر الدفعة والفاتورة والمبلغ');return}if(r.student_id!==i.student_id){msg('الطالب غير متطابق');return}
 $('allocate').disabled=true;const{error}=await db.from('receipt_allocations').insert({receipt_id:r.id,invoice_id:i.id,amount,created_by:userId});$('allocate').disabled=false;if(error)msg('فشل التوزيع: '+error.message);else await load()};
 $('refresh').onclick=load;
-(async()=>{try{const{data:{user},error}=await db.auth.getUser();if(error||!user)throw Error('auth');userId=user.id;const{data:p}=await db.from('staff_profiles').select('role,is_active').eq('user_id',user.id).single();if(!p?.is_active||!['accountant','admin','super_admin'].includes(p.role))throw Error('role');role=p.role;if(role==='accountant')$('issueBox').hidden=true;$('state').remove();$('app').style.display='block';await load()}catch(e){location.replace('./dashboard.html')}})();
+(async()=>{try{const{data:{user},error}=await db.auth.getUser();if(error||!user)throw Error('auth');userId=user.id;const{data:p}=await db.from('staff_profiles').select('role,is_active').eq('user_id',user.id).single();if(!p?.is_active||!(await allowed('invoices.view')||await allowed('invoices.create')||await allowed('invoices.allocate')))throw Error('role');role=p.role;$('issueBox').hidden=!(await allowed('invoices.create'));$('allocate').hidden=!(await allowed('invoices.allocate'));$('state').remove();$('app').style.display='block';await load()}catch(e){location.replace('./dashboard.html')}})();
 </script></body></html>
