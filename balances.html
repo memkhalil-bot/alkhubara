@@ -16,4 +16,4 @@ for(const v of entries){if(reversed.has(v.id))continue;if(v.entry_type==='receip
 render('students',[...s.values()]);render('teachers',[...t.values()]);$('status').textContent='تم الحساب. الأرصدة تقديرية.'}catch(e){$('status').textContent='تعذر إكمال التقرير: '+e.message}}
 $('reload').onclick=load;$('back').onclick=()=>location.assign('./dashboard.html');
 (async()=>{const{data:{user}}=await db.auth.getUser();if(!user)return location.replace('./login.html');const{data:p}=await db.from('staff_profiles').select('role,is_active').eq('user_id',user.id).single();const rights=await getGrants();if(!p?.is_active||(p.role!=='super_admin'&&!rights.has('finance.view')&&!rights.has('finance.edit')))return location.replace('./dashboard.html');$('gate').remove();$('app').style.display='block';await load()})();
-</script></body></html>
+</script><script src="./table-enhancements.js" defer></script></body></html>
