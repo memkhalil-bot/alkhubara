@@ -154,12 +154,14 @@ async function loadPeople(){
  students=s.data||[];teachers=t.data||[];fill($('student_id'),students);fill($('teacher_id'),teachers);
 }
 async function load(){
- const {data,error}=await supabase.from('financial_entries').select('id,entry_date,entry_type,student_id,teacher_id,amount,category,description,reference_number,payment_method,reverses_entry_id,created_at').order('created_at',{ascending:false}).limit(500);
- if(error){msg('فشل تحميل الحركات: '+error.message,true);return}
- entries=data||[];$('rows').replaceChildren();$('count').textContent=entries.length+' قيد معروض (حد أقصى 500)';
- const reversed=new Set(entries.filter(e=>e.entry_type==='reversal'&&e.reverses_entry_id).map(e=>e.reverses_entry_id));
+ const allEntries=[];const pageSize=500;
+ for(let from=0;;from+=pageSize){const {data,error}=await supabase.from('financial_entries').select('id,entry_date,entry_type,student_id,teacher_id,amount,category,description,reference_number,payment_method,reverses_entry_id,created_at').order('created_at',{ascending:false}).order('id',{ascending:false}).range(from,from+pageSize-1);
+ if(error){msg('فشل تحميل الحركات كاملة؛ لم يتم عرض إجماليات غير دقيقة: '+error.message,true);return}
+ allEntries.push(...(data||[]));if(!data||data.length<pageSize)break}
+ entries=allEntries.slice(0,500);$('rows').replaceChildren();$('count').textContent=entries.length+' من '+allEntries.length+' قيد (الإجماليات تشمل الجميع)';
+ const reversed=new Set(allEntries.filter(e=>e.entry_type==='reversal'&&e.reverses_entry_id).map(e=>e.reverses_entry_id));
  const totals={receipt:0,expense:0,teacher_payment:0};
- for(const entry of entries){
+ for(const entry of allEntries){
   if(entry.entry_type==='reversal')continue;
   if(totals[entry.entry_type]===undefined)continue;
   if(reversed.has(entry.id))continue;totals[entry.entry_type]+=Number(entry.amount);
