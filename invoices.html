@@ -29,7 +29,7 @@ students=s;invoices=inv;entries=fin;allocations=al;
 const invoicedLessons=new Set(inv.filter(x=>x.lesson_id).map(i=>i.lesson_id+'|'+i.student_id));
 const invoicedServices=new Set(inv.filter(x=>x.service_id).map(i=>i.service_id));
 const serviceRates=new Map(spr.map(x=>[x.service_id,x]));
-const activeLessons=new Map(ls.filter(x=>x.status==='completed'&&!x.is_archived).map(x=>[x.id,x]));
+const activeLessons=new Map(ls.filter(x=>(x.status==='confirmed'||x.status==='completed')&&!x.is_archived).map(x=>[x.id,x]));
 sources=[...lp.filter(x=>activeLessons.has(x.lesson_id)&&!invoicedLessons.has(x.lesson_id+'|'+x.student_id)).map(x=>({id:x.lesson_id,sourceKey:x.lesson_id+'|'+x.student_id,student_id:x.student_id,type:'lesson',label:'حصة '+activeLessons.get(x.lesson_id).subject,amount:Number(x.price)})),
 ...sv.filter(x=>x.status==='completed'&&!x.is_archived&&!invoicedServices.has(x.id)&&serviceRates.has(x.id)).map(x=>({id:x.id,sourceKey:x.id,student_id:x.student_id,type:'service',label:'خدمة '+x.description,amount:Number(serviceRates.get(x.id).amount)}))].filter(x=>x.amount>0);
 $('source').replaceChildren();option($('source'),'','اختر الحصة أو الخدمة');sources.forEach(x=>option($('source'),x.sourceKey,x.label+' — '+name(x.student_id)));
