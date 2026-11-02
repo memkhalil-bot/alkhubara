@@ -44,13 +44,13 @@ body{background:#f5f7f6}
 <div id="teacherField"><label for="teacher_id">المدرس *</label><select id="teacher_id"></select></div>
 <div id="timeField"><label for="start_time">وقت البداية *</label><input id="start_time" type="time" value="09:00"></div>
 <div id="endTimeField"><label for="end_time">وقت النهاية *</label><input id="end_time" type="time" value="10:00"></div><div id="hoursField"><label for="hours">المدة (محسوبة تلقائيًا)</label><input id="hours" type="number" step="0.01" readonly value="1"></div><div id="locationField"><label for="lesson_location">مكان الحصة</label><select id="lesson_location"><option value="center">داخل المركز</option><option value="outside">خارج المركز</option><option value="online">أونلاين</option></select></div>
-<div id="subjectField" class="wide"><label for="subject">المادة *</label><select id="subject"><option value="">اختر المادة من القائمة</option></select><p class="muted" id="noSubjects" hidden>لا توجد مواد مسجلة؛ أضف المادة من صفحة الطلاب والمدرسين أولًا.</p></div>
+<div id="subjectField" class="wide"><label for="subject">المادة *</label><select id="subject"><option value="">اختر المادة من القائمة</option></select><p class="muted" id="noSubjects" hidden>لا توجد مواد مسجلة في الدليل الأكاديمي. تواصل مع مدير النظام.</p></div>
 <div id="serviceTypeField" hidden><label for="service_type">نوع الخدمة *</label><select id="service_type"><option value="homework">واجب</option><option value="research">بحث</option><option value="project">مشروع</option><option value="other">أخرى</option></select></div>
 <div id="descriptionField" class="wide" hidden><label for="description">وصف الخدمة *</label><input id="description" maxlength="1000"></div>
 <div><label for="statusInput">حالة العملية</label><select id="statusInput"></select></div>
-<div><label for="payment_status">حالة السداد الفعلية</label><select id="payment_status" disabled><option value="unpaid">لم يُحصّل</option><option value="partial">محصل جزئيًا</option><option value="paid">محصل بالكامل</option></select></div>
+<div><label for="payment_status">التحصيل المسجل ماليًا (للعرض فقط)</label><select id="payment_status" disabled><option value="unpaid">لم يُحصّل</option><option value="partial">محصل جزئيًا</option><option value="paid">محصل بالكامل</option></select></div>
 <div id="lessonPriceField"><label for="lessonPrice">قيمة الحصة (ر.ق)</label><input id="lessonPrice" type="number" min="50" max="2000" step="0.01" inputmode="decimal" placeholder="أدخل مبلغًا من 50 إلى 2000 ر.ق"><small class="muted">قيمة الحصة لكل طالب (50–2000 ر.ق). في الحصة الجماعية يُحسب إجمالي قيمة الطلاب دون تكرار ساعات المدرس.</small></div>
-<div><label for="paymentTerms">طريقة السداد</label><select id="paymentTerms"><option value="immediate">فوري</option><option value="credit">آجل</option></select></div><div id="dueField" hidden><label for="dueDate">تاريخ الاستحقاق *</label><input type="date" id="dueDate"></div><div id="notesField" class="wide"><label for="notes">ملاحظات</label><textarea id="notes" maxlength="3000"></textarea></div>
+<div><label for="paymentTerms">موعد السداد المتفق عليه</label><select id="paymentTerms"><option value="credit">لم يتم السداد — آجل</option><option value="immediate">السداد فوري (التحصيل يُسجّل ماليًا)</option></select><small class="muted">تغيير موعد السداد لا يسجّل تحصيلًا. للتحصيل استخدم إجراء التحصيل المالي للحصة المكتملة.</small></div><div id="dueField" hidden><label for="dueDate">تاريخ الاستحقاق *</label><input type="date" id="dueDate"></div><div id="notesField" class="wide"><label for="notes">ملاحظات</label><textarea id="notes" maxlength="3000"></textarea></div>
 <div class="full toolbar"><button id="save" type="submit">حفظ الحصة</button><button id="cancel" class="secondary" type="button" hidden>إلغاء التعديل</button></div></form>
 <p id="noPeople" class="muted" hidden>أضف طالبًا ومدرسًا أولًا من <a href="./people.html">وحدة الطلاب والمدرسين</a>.</p>
 <div id="status" role="status" aria-live="polite"></div>
@@ -80,7 +80,7 @@ $('start_time').addEventListener('change',calculateHours);$('end_time').addEvent
 let catalog=[],priceData=[];
 async function loadSubjects(){const {data,error}=await supabase.from('academic_subjects').select('id,subject_name').order('subject_name');if(error){note('تعذر تحميل المواد: '+error.message,true);return}
 catalog=data||[];const field=$('subject'),keep=field.value;field.replaceChildren();const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='اختر المادة المسجلة';field.append(placeholder);
-for(const x of catalog){const o=document.createElement('option');o.value=x.subject_name;o.textContent=x.subject_name;field.append(o)}field.value=keep;$('noSubjects').hidden=catalog.length>0}
+for(const x of catalog){const o=document.createElement('option');o.value=x.subject_name;o.textContent=x.subject_name;field.append(o)}if([...field.options].some(o=>o.value===keep))field.value=keep;$('noSubjects').hidden=catalog.length>0}
 async function refreshPrice(){if(!editing)return;const rate=priceData.find(x=>x.lesson_id===editing);const record=records.find(x=>x.id===editing);if(record?.lesson_total_price!=null){$('lessonPrice').value=Number(record.lesson_total_price).toFixed(2)}else if(rate&&Number($('hours').value)>0){$('lessonPrice').value=(Number(rate.student_hourly_rate)*Number($('hours').value)).toFixed(2)}else $('lessonPrice').value=''}
 async function loadPrice(){priceData=[];if(!editing){refreshPrice();return}const{data,error}=await supabase.from('lesson_rates').select('lesson_id,student_hourly_rate').eq('lesson_id',editing);if(!error)priceData=data||[];refreshPrice();const r=records.find(x=>x.id===editing);const ready=kind==='lessons'&&r?.status==='completed'&&!r?.is_archived;
 $('collectPanel').hidden=!(ready&&canCollect);
@@ -99,7 +99,7 @@ function nameOf(items,id){return items.find(x=>x.id===id)?.full_name||'—'}
 function studentTableLabel(id){const s=students.find(x=>x.id===id);return s?'طالب #'+s.student_code:'طالب (رقم غير متاح)'}
 function anonymizeStudentText(v){let t=String(v??'—');for(const s of students){if(s.full_name&&s.full_name.length>=2)t=t.split(s.full_name).join(studentTableLabel(s.id))}return t}
 function textCell(tr,content){const td=document.createElement('td');td.textContent=anonymizeStudentText(content);tr.append(td);return td}
-function toggleCredit(){$('dueField').hidden=$('paymentTerms').value!=='credit';$('dueDate').required=$('paymentTerms').value==='credit';$('dueDate').max=addDays($('date').value,30);$('dueDate').min=$('date').value}
+function toggleCredit(){$('dueField').hidden=$('paymentTerms').value!=='credit';$('dueDate').required=$('paymentTerms').value==='credit';$('dueDate').max=addDays($('date').value,30);$('dueDate').min=$('date').value;if($('paymentTerms').value==='credit'&&!$('dueDate').value)$('dueDate').value=addDays($('date').value,30)}
 function addDays(date,days){if(!date)return '';const d=new Date(date+'T12:00:00');d.setDate(d.getDate()+days);return d.toLocaleDateString('en-CA')}
 $('lessonMode').addEventListener('change',()=>{configure();$('student_id').value='';groupPicker.clear()});
 $('date').addEventListener('change',toggleCredit);
@@ -117,11 +117,10 @@ function configure(){
  $('noPeople').hidden=students.length>0 && (!lesson||teachers.length>0);toggleCredit();
 }
 function clearForm(){
- editing=null;priceData=[];$('lessonMode').value='individual';groupPicker.clear();$('collectPanel').hidden=true;$('form').reset();$('lessonPrice').value='';$('dueDate').value='';$('end_time').value='10:00';$('date').value=new Date().toLocaleDateString('en-CA');$('start_time').value='09:00';calculateHours();$('cancel').hidden=true;configure();
+ editing=null;priceData=[];$('lessonMode').value='individual';groupPicker.clear();$('collectPanel').hidden=true;$('form').reset();$('paymentTerms').value='credit';$('payment_status').value='unpaid';$('lessonPrice').value='';$('dueDate').value='';$('end_time').value='10:00';$('date').value=new Date().toLocaleDateString('en-CA');$('start_time').value='09:00';calculateHours();$('cancel').hidden=true;configure();toggleCredit();
 }
-$('student_id').addEventListener('change',()=>{if(editing||kind!=='lessons')return;const student=students.find(x=>x.id===$('student_id').value);if(!student)return;$('paymentTerms').value=student.default_payment_terms||'immediate';if(student.default_payment_terms==='credit')$('dueDate').value=addDays($('date').value,Math.min(30,Number(student.default_credit_days)||30));toggleCredit()});
 async function loadPeople(){
- const [s,t]=await Promise.all([supabase.from('students').select('id,full_name,student_code,default_payment_terms,default_credit_days').eq('is_archived',false).order('full_name').limit(1000),supabase.from('teachers').select('id,full_name').eq('is_archived',false).order('full_name').limit(1000)]);
+ const [s,t]=await Promise.all([supabase.from('students').select('id,full_name,student_code').eq('is_archived',false).order('full_name').limit(1000),supabase.from('teachers').select('id,full_name').eq('is_archived',false).order('full_name').limit(1000)]);
  if(s.error||t.error){note('تعذر تحميل الطلاب والمدرسين، راجع الصلاحيات.',true);return false}
  students=s.data||[];teachers=t.data||[];option($('student_id'),students);option($('groupStudents'),students);$('groupStudents').selectedIndex=-1;groupPicker.refresh();option($('teacher_id'),teachers);configure();return true
 }
@@ -173,5 +172,5 @@ $('logout').addEventListener('click',async()=>{await supabase.auth.signOut();loc
 (async()=>{try{const {data:{user},error}=await supabase.auth.getUser();if(error||!user)throw Error('no-user');uid=user.id;
 const {data:p,error:pe}=await supabase.from('staff_profiles').select('full_name,role,is_active').eq('user_id',uid).single();if(pe||!p?.is_active)throw Error('not-authorized');role=p.role;checkGrant=await getGrants(supabase);canCollect=p.role==='super_admin'||(['finance.edit','invoices.create','invoices.allocate'].every(checkGrant));canEdit=p.role==='super_admin'||checkGrant('lessons.edit')||checkGrant('services.edit');
 $('who').textContent=(p.full_name||user.email)+' · '+(roleLabels[p.role]||'موظف بصلاحيات مخصصة');$('editor').hidden=!canEdit;$('readonly').hidden=canEdit;
-$('state').hidden=true;$('app').style.display='block';clearForm();await loadPeople();await load()}catch(e){location.replace('./login.html')}})();
+$('state').hidden=true;$('app').style.display='block';clearForm();await loadPeople();await loadSubjects();await load()}catch(e){location.replace('./login.html')}})();
 </script><script src="./table-enhancements.js" defer></script></body></html>
