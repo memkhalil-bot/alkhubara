@@ -62,7 +62,7 @@ async function scan(){
  }
  entries=result;const problematic=result.filter(x=>x.issues.length);
  $('counts').textContent='طلاب: '+result.filter(x=>x.sheet==='Students').length+' · مدرسون: '+result.filter(x=>x.sheet==='Teachers').length+' · مواد جديدة: '+result.filter(x=>x.sheet==='Subjects').length+' · أخطاء: '+problematic.length;
- previewValid=problematic.length===0 && result.some(x=>x.sheet==='Students'||x.sheet==='Teachers');$('import').disabled=!previewValid;show();
+ previewValid=problematic.length===0 && result.length>0;$('import').disabled=!previewValid;show();
  setStatus(problematic.length?'يوجد '+problematic.length+' صف يحتاج تصحيحًا قبل الحفظ':'المعاينة ناجحة. يمكنك اعتماد الاستيراد.');
 }
 function downloadTemplate(){
