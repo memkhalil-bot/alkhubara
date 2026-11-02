@@ -52,7 +52,7 @@ $('teacherLessonForm').onsubmit=async ev=>{ev.preventDefault();
  if(participants.length<(isGroup?2:1)||participants.length>10){$('result').textContent='اختر '+(isGroup?'من طالبين إلى 10 طلاب':'طالبًا واحدًا');return}
  const price=Number($('teachPrice').value);if(!Number.isFinite(price)||price<50||price>2000){$('result').textContent='السعر لكل طالب من 50 إلى 2000 ريال';return}
  const start=$('teachStart').value,end=$('teachEnd').value;if(!start||!end||end<=start){$('result').textContent='وقت النهاية يجب أن يكون بعد البداية';return}
- const fields={teacher_id:p.teacher_id,lesson_date:$('teachDate').value,start_time:start,end_time:end,lesson_location:$('teachPlace').value,subject:$('teachSubject').value,notes:$('teachNotes').value,payment_terms:'immediate',status:'scheduled'};
+ const fields={teacher_id:p.teacher_id,lesson_date:$('teachDate').value,start_time:start,end_time:end,lesson_location:$('teachPlace').value,subject:$('teachSubject').value,notes:$('teachNotes').value,payment_terms:'credit',due_date:(()=>{const d=new Date($('teachDate').value+'T12:00:00');d.setDate(d.getDate()+30);return d.toLocaleDateString('en-CA')})(),status:'scheduled'};
  $('teachSave').disabled=true;const {error:saveError}=await db.rpc('save_lesson_session',{p_lesson:null,p_fields:fields,p_students:participants,p_price:price});
  $('teachSave').disabled=false;if(saveError){$('result').textContent='تعذر تسجيل الحصة: '+saveError.message;return}
  $('result').textContent='تم تسجيل '+(isGroup?'الحصة الجماعية':'الحصة الفردية')+' بنجاح. ستظهر في حصصك.';
