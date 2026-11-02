@@ -42,7 +42,7 @@ $('rows').replaceChildren();for(const i of invoices){const paid=al.filter(a=>a.i
 $('source').dispatchEvent(new Event('change'));
 }catch(e){msg('تعذر عرض التقرير: '+e.message)}}
 $('source').addEventListener('change',()=>{const x=sources.find(x=>x.sourceKey===$('source').value);$('student').value=x?name(x.student_id):'';$('expected').value=x?m(x.amount):''});
-$('issue').onclick=async()=>{if(!(await allowed('invoices.create')))return;const x=sources.find(x=>x.id===$('source').value);if(!x)return; $('issue').disabled=true;
+$('issue').onclick=async()=>{if(!(await allowed('invoices.create')))return;const x=sources.find(x=>String(x.sourceKey)===$('source').value);if(!x)return; $('issue').disabled=true;
 const data={student_id:x.student_id,amount:x.amount,created_by:userId,...(x.type==='lesson'?{lesson_id:x.id}:{service_id:x.id})};const{error}=await db.from('invoices').insert(data);
 $('issue').disabled=false;if(error)msg('فشل إصدار الفاتورة: '+error.message);else await load()};
 $('allocate').onclick=async()=>{const r=receipts.find(x=>x.id===$('receipt').value),i=invoices.find(x=>x.id===$('invoice').value),amount=Number($('allocAmount').value);if(!r||!i||!Number.isFinite(amount)||amount<=0){msg('اختر الدفعة والفاتورة والمبلغ');return}if(r.student_id!==i.student_id){msg('الطالب غير متطابق');return}
