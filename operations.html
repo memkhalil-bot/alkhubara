@@ -99,7 +99,7 @@ function nameOf(items,id){return items.find(x=>x.id===id)?.full_name||'—'}
 function studentTableLabel(id){const s=students.find(x=>x.id===id);return s?'طالب #'+s.student_code:'طالب (رقم غير متاح)'}
 function anonymizeStudentText(v){let t=String(v??'—');for(const s of students){if(s.full_name&&s.full_name.length>=2)t=t.split(s.full_name).join(studentTableLabel(s.id))}return t}
 function textCell(tr,content){const td=document.createElement('td');td.textContent=anonymizeStudentText(content);tr.append(td);return td}
-function toggleCredit(){const credit=$('paymentTerms').value==='credit',due=$('dueDate'),date=$('date').value;due.parentElement.hidden=!credit;due.required=credit;due.min=date||'';due.max=addDays(date,30);if(credit&&date&&(!due.value||due.value<due.min||due.value>due.max))due.value=addDays(date,30)}
+function toggleCredit(){const credit=$('paymentTerms').value==='credit',due=$('dueDate'),date=$('date').value;due.parentElement.hidden=!credit;due.required=credit;due.min=date||'';due.max=addDays(date,30);if(credit&&date&&!due.value&&!editing)due.value=addDays(date,30)}
 function addDays(date,days){if(!date)return '';const d=new Date(date+'T12:00:00');d.setDate(d.getDate()+days);return d.toLocaleDateString('en-CA')}
 $('lessonMode').addEventListener('change',()=>{configure();$('student_id').value='';groupPicker.clear()});
 $('date').addEventListener('change',toggleCredit);
@@ -117,7 +117,7 @@ function configure(){
  $('noPeople').hidden=students.length>0 && (!lesson||teachers.length>0);toggleCredit();
 }
 function clearForm(){
- editing=null;priceData=[];$('lessonMode').value='individual';groupPicker.clear();$('collectPanel').hidden=true;$('form').reset();$('servicePrice').value='';$('paymentTerms').value='credit';$('payment_status').value='unpaid';$('lessonPrice').value='';$('dueDate').value='';$('end_time').value='10:00';$('date').value=new Date().toLocaleDateString('en-CA');$('start_time').value='09:00';calculateHours();$('cancel').hidden=true;configure();toggleCredit();
+ editing=null;priceData=[];$('lessonMode').value='individual';groupPicker.clear();$('collectPanel').hidden=true;$('form').reset();$('servicePrice').value='';$('paymentTerms').value='credit';$('payment_status').value='unpaid';$('lessonPrice').value='';$('dueDate').value='';$('end_time').value='10:00';$('date').value=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Qatar',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());$('start_time').value='09:00';calculateHours();$('cancel').hidden=true;configure();toggleCredit();
 }
 async function loadPeople(){
  const [s,t]=await Promise.all([supabase.from('students').select('id,full_name,student_code').eq('is_archived',false).order('full_name').limit(1000),supabase.from('teachers').select('id,full_name').eq('is_archived',false).order('full_name').limit(1000)]);
