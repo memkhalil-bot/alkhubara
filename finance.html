@@ -75,7 +75,7 @@ setType()}
 }
 document.querySelectorAll('.finance-tabs button').forEach(b=>b.addEventListener('click',()=>showFinanceTab(b.dataset.ft)));
 const statuses={pending:'بانتظار الاعتماد',clarification:'مطلوب استيضاح',resubmitted:'أُعيد للمراجعة',approved:'معتمد للصرف',rejected:'مرفوض',paid:'تم الصرف',cancelled:'ملغى'};
-const manager=()=>role==='super_admin',financeEditor=()=>manager()||grant('finance.edit');let editingExpenseId=null,editingEntry=null;
+const manager=()=>role==='super_admin'&&grant('expenses.approve'),financeEditor=()=>manager()||grant('finance.edit');let editingExpenseId=null,editingEntry=null;
 async function expenseAction(id,action,payload={}){
  const {error}=await supabase.rpc('expense_request_action',{request_id:id||null,action_name:action,payload});
  if(error){$('expenseMessage').textContent='تعذر تنفيذ الإجراء: '+error.message;return false}
