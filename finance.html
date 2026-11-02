@@ -116,7 +116,7 @@ async function loadCredits(){
  supabase.from('lesson_participants').select('lesson_id,student_id,price').limit(1000)
  ]);const all=[l,s,i,a,e,lp];if(all.some(x=>x.error)){$('creditCount').textContent='تعذر جلب البيانات: '+all.find(x=>x.error).error.message;return}
  if(all.some(x=>x.data.length===1000)){$('creditCount').textContent='العدد تجاوز 1000؛ يلزم تقرير خادمي لاستكمال الحساب';return}
- const lessonMap=new Map(l.data.filter(x=>x.status==='completed').map(x=>[x.id,x]));
+ const lessonMap=new Map(l.data.filter(x=>x.status==='confirmed'||x.status==='completed').map(x=>[x.id,x]));
  const serviceMap=new Map(s.data.filter(x=>x.status==='completed').map(x=>[x.id,x]));
  const reversed=new Set(e.data.filter(x=>x.entry_type==='reversal').map(x=>x.reverses_entry_id));
  const receipts=new Set(e.data.filter(x=>x.entry_type==='receipt'&&!reversed.has(x.id)).map(x=>x.id));
