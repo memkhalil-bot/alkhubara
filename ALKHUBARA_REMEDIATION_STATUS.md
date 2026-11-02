@@ -1,7 +1,7 @@
 # ALKHUBARA — Remediation execution register
 Date: 2026-11-02
 Source: Claude handoff dated 2026-11-02. Authorization: owner requested execution.
-**State: PARTIAL IMPLEMENTATION. No production deployment of this batch.**
+**State: PARTIAL IMPLEMENTATION. Latest Vercel preview READY. No production deployment of this batch.**
 
 ## Changes staged in GitHub branch
 - H-03: Remove destructive delete button from people.html; archive and restore remain. Server RPC still exists and requires separate security review.
@@ -26,3 +26,9 @@ H-01 schema baseline + staging rebuild; H-02 full policy/RPC permission test mat
 2. Run HTML/JS syntax checks, privileged role API tests, and full end-to-end workflows for financial records.
 3. Verify changes with a second independent review and owner signoff.
 4. Only then deploy to production, ensuring rollback is safe and does not restore known vulnerable financial paths.
+
+## Additional execution — 2026-11-03
+- H-09: invoices.html and reports.html now fetch successive stable ID-ordered pages instead of failing on fixed 500/1000-row ceilings. This is a bridge; server-side aggregates and filtered pagination remain required.
+- Vercel preview deployment: dpl_DswFxHE1trUm1o9Rtwx5gDfWRZ37, READY. Preview URL: https://alkhubara-i76vvrwqg-mohkhalil.vercel.app — may be protected by Vercel Authentication. It uses the production database configuration, thus no write-side synthetic tests were run.
+- Static JavaScript compilation check passed for people, finance, invoices, operations, reports, account-statements, teacher-subjects-report. This is not an end-to-end test.
+- No database migration / production deployment in this continuation.
