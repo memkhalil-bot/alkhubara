@@ -128,14 +128,18 @@ async function load(){
  const key=kind==='lessons'?'lessons':'services';canEdit=role==='super_admin'||checkGrant(key+'.edit');$('editor').hidden=!canEdit;$('readonly').hidden=canEdit;if(role!=='super_admin'&&!canEdit&&!checkGrant(key+'.view')){note('ليس لديك صلاحية لهذا القسم',true);$('rows').replaceChildren();return}
  $('count').textContent='جارٍ التحميل...';$('rows').replaceChildren();
  const cols=kind==='lessons'?'id,student_id,lesson_mode,teacher_id,lesson_date,start_time,end_time,hours,lesson_total_price,subject,lesson_location,status,payment_status,payment_terms,due_date,notes,is_archived':'id,student_id,service_date,service_type,description,status,payment_status,payment_terms,due_date,is_archived';
- const {data,error}=await supabase.from(kind).select(cols).eq('is_archived',$('archived').checked).order(kind==='lessons'?'lesson_date':'service_date',{ascending:false}).limit(500);
- if(error){note('تعذر تحميل السجلات: '+error.message,true);$('count').textContent='خطأ في التحميل';return}
- records=data||[];if(kind==='lessons'&&records.length){const ids=records.map(x=>x.id);const {data:participants,error:participantsError}=await supabase.from('lesson_participants').select('lesson_id,student_id,price').in('lesson_id',ids);if(!participantsError){for(const rec of records)rec.participants=(participants||[]).filter(p=>p.lesson_id===rec.id).map(p=>p.student_id)}}render();
+ const result=[],pageSize=500,sortKey=kind==='lessons'?'lesson_date':'service_date';
+ for(let offset=0;;offset+=pageSize){const {data,error}=await supabase.from(kind).select(cols).eq('is_archived',$('archived').checked).order(sortKey,{ascending:false}).order('id',{ascending:false}).range(offset,offset+pageSize-1);
+ if(error){note('تعذر تحميل السجلات كاملة: '+error.message,true);$('count').textContent='خطأ في التحميل';return}
+ result.push(...(data||[]));if(!data||data.length<pageSize)break}
+ records=result;
+ if(kind==='lessons'&&records.length){const byLesson=new Map();for(let idx=0;idx<records.length;idx+=100){const ids=records.slice(idx,idx+100).map(x=>x.id);const {data:participants,error:participantsError}=await supabase.from('lesson_participants').select('lesson_id,student_id,price').in('lesson_id',ids);if(participantsError){note('تعذر تحميل المشاركين بالحصة: '+participantsError.message,true);return}for(const p of participants||[]){if(!byLesson.has(p.lesson_id))byLesson.set(p.lesson_id,[]);byLesson.get(p.lesson_id).push(p.student_id)}}for(const rec of records)rec.participants=byLesson.get(rec.id)||[rec.student_id]}
+ render();
 }
 function render(){
  const q=$('search').value.trim().toLocaleLowerCase('ar'),date=$('dateFilter').value;
  const filtered=records.filter(r=>{const hay=[...(r.participants||[r.student_id]).map(id=>nameOf(students,id)),nameOf(teachers,r.teacher_id),r.subject,r.description,serviceLabels[r.service_type]].join(' ').toLocaleLowerCase('ar');return (!q||hay.includes(q))&&(!date||(r.lesson_date||r.service_date)===date)});
- $('count').textContent=filtered.length+' سجل معروض (حد أقصى 500)';$('rows').replaceChildren();
+ $('count').textContent=filtered.length+' سجل مطابق';$('rows').replaceChildren();
  if(!filtered.length){const tr=document.createElement('tr');const td=textCell(tr,'لا توجد سجلات مطابقة');td.colSpan=kind==='lessons'?10:7;$('rows').append(tr);return}
  for(const rec of filtered){const tr=document.createElement('tr');textCell(tr,rec.lesson_date||rec.service_date);textCell(tr,kind==='lessons'&&rec.lesson_mode==='group'?(rec.participants||[rec.student_id]).map(id=>studentTableLabel(id)).join('، '):studentTableLabel(rec.student_id));
   if(kind==='lessons'){textCell(tr,nameOf(teachers,rec.teacher_id));textCell(tr,rec.subject);textCell(tr,rec.start_time?.slice(0,5));textCell(tr,rec.end_time?.slice(0,5));textCell(tr,rec.hours)}
