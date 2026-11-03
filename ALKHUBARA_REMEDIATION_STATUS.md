@@ -42,3 +42,9 @@ H-01 schema baseline + staging rebuild; H-02 full policy/RPC permission test mat
 
 ## Confirmed server finding — H-03
 Read-only examination of public.delete_person_safely showed that it performs hard DELETE for unlinked students/teachers after checking students.edit or teachers.edit, and writes prior JSON to audit_logs. Although the destructive UI button is removed, the authenticated RPC remains executable by authorized editors. Proposed server fix (not applied): revoke EXECUTE from authenticated, preserve archiving UI; reintroduce a tightly scoped audited deletion process only if explicitly required after role tests. Do not treat UI removal as full security remediation.
+
+## 2026-11-03 continuation
+- teacher.html: lesson submission now calls only teacher_lessons_submit; existing lesson price displays read-only. Lesson creation pricing policy still needs review.
+- database/pending/20261103_h03_lockdown_delete_person.sql: pending draft, not applied.
+- Verified existing trigger guards for source pricing and receipt allocation, and verified pending_review is set by teacher_lessons_submit.
+- Vercel preview READY: dpl_5NFZ4p7ik7uaDHJrEKAhcZGShYhH. No production deployment or database migration.
