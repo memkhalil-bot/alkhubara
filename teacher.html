@@ -44,7 +44,7 @@ const {data:refs,error:refError}=await db.rpc('lesson_teacher_options');
 if(refError){$('result').textContent='تعذر تحميل أسماء الطلاب والمواد: '+refError.message;return}for(const s of refs.students||[])teacherStudentNames.set(s.id,s.full_name);
 function fillOptions(id,rows,asObject){const field=$(id);field.replaceChildren();for(const item of rows){const opt=document.createElement('option');opt.value=asObject?item.id:item;opt.textContent=asObject?item.full_name:item;field.append(opt)}if(id==='teachStudents')field.selectedIndex=-1}
 fillOptions('teachStudent',refs.students||[],true);fillOptions('teachStudents',refs.students||[],true);teacherPicker.refresh();fillOptions('teachSubject',refs.subjects||[],false);
-$('teachDate').value=new Date().toLocaleDateString('en-CA');
+$('teachDate').value=(()=>{const p=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Qatar',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const v=t=>p.find(x=>x.type===t).value;return v('year')+'-'+v('month')+'-'+v('day')})();
 $('teachMode').onchange=()=>{$('teachSingleField').hidden=$('teachMode').value==='group';$('teachGroupField').hidden=$('teachMode').value!=='group'};
 $('teacherLessonForm').onsubmit=async ev=>{ev.preventDefault();
  const isGroup=$('teachMode').value==='group';
@@ -52,11 +52,11 @@ $('teacherLessonForm').onsubmit=async ev=>{ev.preventDefault();
  if(participants.length<(isGroup?2:1)||participants.length>10){$('result').textContent='اختر '+(isGroup?'من طالبين إلى 10 طلاب':'طالبًا واحدًا');return}
  const price=Number($('teachPrice').value);if(!Number.isFinite(price)||price<50||price>2000){$('result').textContent='السعر لكل طالب من 50 إلى 2000 ريال';return}
  const start=$('teachStart').value,end=$('teachEnd').value;if(!start||!end||end<=start){$('result').textContent='وقت النهاية يجب أن يكون بعد البداية';return}
- const fields={teacher_id:p.teacher_id,lesson_date:$('teachDate').value,start_time:start,end_time:end,lesson_location:$('teachPlace').value,subject:$('teachSubject').value,notes:$('teachNotes').value,payment_terms:'credit',due_date:(()=>{const d=new Date($('teachDate').value+'T12:00:00');d.setDate(d.getDate()+30);return d.toLocaleDateString('en-CA')})(),status:'scheduled'};
+ const fields={teacher_id:p.teacher_id,lesson_date:$('teachDate').value,start_time:start,end_time:end,lesson_location:$('teachPlace').value,subject:$('teachSubject').value,notes:$('teachNotes').value,payment_terms:'credit',due_date:(()=>{const d=new Date($('teachDate').value+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+30);return d.toISOString().slice(0,10)})(),status:'scheduled'};
  $('teachSave').disabled=true;const {error:saveError}=await db.rpc('save_lesson_session',{p_lesson:null,p_fields:fields,p_students:participants,p_price:price});
  $('teachSave').disabled=false;if(saveError){$('result').textContent='تعذر تسجيل الحصة: '+saveError.message;return}
  $('result').textContent='تم تسجيل '+(isGroup?'الحصة الجماعية':'الحصة الفردية')+' بنجاح. ستظهر في حصصك.';
- $('teacherLessonForm').reset();teacherPicker.clear();$('teachMode').onchange();$('teachDate').value=new Date().toLocaleDateString('en-CA');await display(p.teacher_id);
+ $('teacherLessonForm').reset();teacherPicker.clear();$('teachMode').onchange();$('teachDate').value=(()=>{const p=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Qatar',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const v=t=>p.find(x=>x.type===t).value;return v('year')+'-'+v('month')+'-'+v('day')})();await display(p.teacher_id);
 };
 await display(p.teacher_id)
 })()
