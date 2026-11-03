@@ -62,3 +62,6 @@ Read-only examination of public.delete_person_safely showed that it performs har
 - H-06: applied trigger lock_invoiced_lesson_rates via migration lock_invoiced_lesson_rates_20261103, verified present in pg_trigger. It locks UPDATE/DELETE of rates for lessons that already have invoices.
 - H-05: record_receipt_v2 implementation remains in database/pending/20261103_h05_receipt_idempotency.sql and is **NOT APPLIED**; frontend continues previous receipt paths. No external idempotency guarantee yet.
 - Staging DB unavailable (no Supabase development branches configured); no financial synthetic-data writes on production. Full 20-item handoff is not complete. In particular H-01 baseline schema, H-04 UI consolidation, H-05 server idempotency, H-07 invoice adjustments, H-13 idempotent lesson submission, H-15 import transactions, and role-E2E security tests remain.
+
+## Staging blocker
+- Requested a Supabase development branch named alkhubara-remediation-staging. Supabase refused creation pending explicit cost confirmation ID; no branch was created and no branch charge was accepted. Financial migration H-05 remains unapplied. No isolated financial write tests could run.
