@@ -65,3 +65,12 @@ Read-only examination of public.delete_person_safely showed that it performs har
 
 ## Staging blocker
 - Requested a Supabase development branch named alkhubara-remediation-staging. Supabase refused creation pending explicit cost confirmation ID; no branch was created and no branch charge was accepted. Financial migration H-05 remains unapplied. No isolated financial write tests could run.
+
+## Lesson status, discounts and reminders — 2026-11-03
+- Implemented server discount requests and separate approval/rejection, approving manager/date audit, 0-99% validated, one approved discount per lesson, applied uniformly per student's invoice in both individual/group lessons. Original participant price remains unchanged. If receipt allocations exist, approvals are rejected pending formal financial correction. Database migration applied to production; financial role E2E remains outstanding.
+- Invoices now retain original_amount, discount_percent, discount_amount, discount_approved_at, discount_approved_by and print these with the net due, via restricted RPC for approver names.
+- Created discounts.html, linked it in dashboard and teacher.html, and added discount events to notifications action filter.
+- Created manager-only cancel_lesson_with_reason and required cancellation_reason with trigger, rejecting direct invoiced lesson cancellation; updated operations.html.
+- Added complete_lesson_record server RPC to update completion/payment terms without mutating invoiced participant prices. operations.html conditionally shows payment terms on completed lesson and prefills collections with net invoice amount when available.
+- Enabled pg_cron; job alkhubara-teacher-reminders-15m runs every 15 min, sending one notification to the linked active teacher for lessons within next 24h. Stale reminder notifications hidden on rescheduling/cancellation/completion and delivery dedup reset when schedule changes. Verified job active, no live lesson data to test actual delivery.
+- All new migrations applied, and zero production lessons/invoices observed during deployment; this is code/DB smoke validation, NOT authenticated end-to-end or synthetic financial scenario validation.
