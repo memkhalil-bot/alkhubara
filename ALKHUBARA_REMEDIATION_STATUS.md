@@ -54,3 +54,11 @@ Read-only examination of public.delete_person_safely showed that it performs har
 - H-05 UX guard: finance.html and operations.html now require an external transaction reference for noncash payments, preventing accidental reference-free entries through these forms. Server-side validation is NOT yet standardized across all receipt methods.
 - Three touched JavaScript pages parsed successfully; preview deployment dpl_6vW6PGcAXVukCzTewop84kR3UiA2 is READY. Preview: https://alkhubara-6dhjxstux-mohkhalil.vercel.app.
 - H-05 idempotency, H-04 unified balances, H-03 hard-delete RPC revocation and end-to-end staging tests remain open. No production database changes and no production deployment in this pass.
+
+## Production release — 2026-11-03 (consolidated)
+- Vercel production deployment dpl_FkcEL4HSoLKjMSd2qjmqP9f7Zggv at commit 430fe462e8a620c42f02f16f05990b24d601a7af; READY; aliases include alkhubara.qa and www.alkhubara.qa. HTML embedded-script syntax checks passed in 11 inspected pages, but no authenticated role E2E was performed.
+- H-03: applied Supabase migration lock_down_hard_delete_person_rpc_20261103; direct EXECUTE for anon and authenticated on delete_person_safely is false, verified by read-only SQL; student count stayed 38.
+- H-04: applied additive read-only views invoice_balances and student_invoice_balances via migration canonical_invoice_balance_views_20261103. SELECT explicitly revoked for anon/authenticated pending role-based tests; these views are NOT yet used by frontend. Query returns zero rows because no invoices exist.
+- H-06: applied trigger lock_invoiced_lesson_rates via migration lock_invoiced_lesson_rates_20261103, verified present in pg_trigger. It locks UPDATE/DELETE of rates for lessons that already have invoices.
+- H-05: record_receipt_v2 implementation remains in database/pending/20261103_h05_receipt_idempotency.sql and is **NOT APPLIED**; frontend continues previous receipt paths. No external idempotency guarantee yet.
+- Staging DB unavailable (no Supabase development branches configured); no financial synthetic-data writes on production. Full 20-item handoff is not complete. In particular H-01 baseline schema, H-04 UI consolidation, H-05 server idempotency, H-07 invoice adjustments, H-13 idempotent lesson submission, H-15 import transactions, and role-E2E security tests remain.
