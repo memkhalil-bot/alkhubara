@@ -17,7 +17,7 @@ const allowed=p=>superAdmin||rights.has(p);
 const fmt=n=>Number(n||0).toLocaleString('ar-QA',{maximumFractionDigits:2});
 const money=n=>fmt(n)+' ر.ق';
 function row(label,value){const line=document.createElement('div');line.className='line';const a=document.createElement('span');a.textContent=label;const b=document.createElement('b');b.textContent=value;line.append(a,b);return line}
-async function fetchRows(table,cols){let all=[];for(let i=0;i<6000;i+=700){const {data,error}=await sb.from(table).select(cols).range(i,i+699);if(error)throw Error(table+': '+error.message);all.push(...data);if(data.length<700)return all}throw Error('عدد السجلات كبير؛ يلزم تحديث التقارير')}
+async function fetchRows(table,cols){const all=[],pageSize=500;for(let i=0;;i+=pageSize){const {data,error}=await sb.from(table).select(cols).order('id',{ascending:true}).range(i,i+pageSize-1);if(error)throw Error(table+': '+error.message);all.push(...(data||[]));if(!data||data.length<pageSize)break}return all}
 const tileList=[
  {title:'الطلاب',key:'students',permission:'students.view',href:'people.html?kind=students',icon:'♙',className:'student',hint:'فتح قاعدة بيانات الطلاب'},
  {title:'المدرسون',key:'teachers',permission:'teachers.view',href:'people.html?kind=teachers',icon:'▣',className:'teacher',hint:'فتح قاعدة بيانات المدرسين'},
