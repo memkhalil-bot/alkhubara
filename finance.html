@@ -194,6 +194,7 @@ $('form').addEventListener('submit',async ev=>{
  if(!Number.isFinite(amount)||amount<=0){msg('المبلغ غير صالح',true);return}
  const payload={entry_date:$('entry_date').value,entry_type:type,amount,category:$('category').value.trim(),description:$('description').value.trim()||null,reference_number:$('reference_number').value.trim()||null,payment_method:$('payment_method').value,student_id:type==='receipt'?$('student_id').value:null,teacher_id:type==='teacher_payment'?$('teacher_id').value:null,created_by:uid};
  if((type==='receipt'&&!payload.student_id)||(type==='teacher_payment'&&!payload.teacher_id)){msg('اختر الطرف المرتبط بالقيد',true);return}
+ if(payload.payment_method!=='cash'&&!payload.reference_number){msg('رقم المرجع مطلوب عند استخدام بطاقة أو تحويل أو شيك أو وسيلة غير نقدية.',true);$('reference_number').focus();return}
  $('save').disabled=true;let error;if(editingEntry){const reason=prompt('سبب تصحيح الحركة (5 أحرف على الأقل):')?.trim();if(!reason||reason.length<5){$('save').disabled=false;return msg('أدخل سبب التصحيح',true)}const outcome=await supabase.rpc('correct_financial_entry',{p_entry_id:editingEntry.id,p_fields:payload,p_reason:reason});error=outcome.error}else{const outcome=await supabase.from('financial_entries').insert(payload);error=outcome.error}$('save').disabled=false;
  if(error){msg('فشل حفظ القيد: '+error.message,true);return}
  resetEntryEdit();msg('تم حفظ الحركة / التصحيح المالي بنجاح');await load();
