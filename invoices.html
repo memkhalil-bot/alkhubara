@@ -38,7 +38,7 @@ receipts=fin.filter(x=>x.entry_type==='receipt'&&!reversed.has(x.id));
 $('receipt').replaceChildren();option($('receipt'),'','اختر الدفعة');receipts.forEach(x=>option($('receipt'),x.id,name(x.student_id)+' — '+m(x.amount)));
 $('invoice').replaceChildren();option($('invoice'),'','اختر الفاتورة');
 for(const i of invoices){const allocated=al.filter(a=>a.invoice_id===i.id&&!reversed.has(a.receipt_id)).reduce((n,a)=>n+Number(a.amount),0);if(i.amount>allocated)option($('invoice'),i.id,'#'+i.invoice_no+' — '+name(i.student_id)+' — متبقٍ '+m(i.amount-allocated))}
-$('rows').replaceChildren();for(const i of invoices){const paid=al.filter(a=>a.invoice_id===i.id&&!reversed.has(a.receipt_id)).reduce((n,a)=>n+Number(a.amount),0),tr=document.createElement('tr');[i.invoice_no,name(i.student_id),i.issued_at.slice(0,10),m(i.amount),m(paid),m(i.amount-paid)].forEach(v=>cell(tr,v));$('rows').append(tr)}msg('عدد الفواتير: '+invoices.length);
+$('rows').replaceChildren();for(const i of invoices){const paid=al.filter(a=>a.invoice_id===i.id&&!reversed.has(a.receipt_id)).reduce((n,a)=>n+Number(a.amount),0),tr=document.createElement('tr');[i.invoice_no,name(i.student_id),new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Qatar',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(i.issued_at)),m(i.amount),m(paid),m(i.amount-paid)].forEach(v=>cell(tr,v));$('rows').append(tr)}msg('عدد الفواتير: '+invoices.length);
 $('source').dispatchEvent(new Event('change'));
 }catch(e){msg('تعذر عرض التقرير: '+e.message)}}
 $('source').addEventListener('change',()=>{const x=sources.find(x=>x.sourceKey===$('source').value);$('student').value=x?name(x.student_id):'';$('expected').value=x?m(x.amount):''});
