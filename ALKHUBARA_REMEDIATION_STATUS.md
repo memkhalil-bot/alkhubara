@@ -32,3 +32,10 @@ H-01 schema baseline + staging rebuild; H-02 full policy/RPC permission test mat
 - Vercel preview deployment: dpl_DswFxHE1trUm1o9Rtwx5gDfWRZ37, READY. Preview URL: https://alkhubara-i76vvrwqg-mohkhalil.vercel.app — may be protected by Vercel Authentication. It uses the production database configuration, thus no write-side synthetic tests were run.
 - Static JavaScript compilation check passed for people, finance, invoices, operations, reports, account-statements, teacher-subjects-report. This is not an end-to-end test.
 - No database migration / production deployment in this continuation.
+
+## Additional execution — 2026-11-03 (second pass)
+- H-09: balances.html, account-statements.html, executive.html now fetch id-ordered complete result batches, removing their prior hard ceilings and unstable offset ordering. Still a transitional client-side read approach, not indexed server-side aggregates or keyset UI pagination.
+- H-10/H-17: account-statements.html converts invoice timestamps to Asia/Qatar date; finance.html defaults and overdue status use Qatar date; invoices.html shows issue timestamp using Qatar date.
+- Verified via read-only SQL: financial_entries/invoices/receipt_allocations/students/lessons/lesson_rates have active RLS with role permissions evaluated via experts_private.has_permission. This does not prove privilege matrix tests yet.
+- Checked modified HTML embedded script syntax (7 pages PASS). Preview deployment dpl_3kjbzqsLj4XjtG9yPcsTThaZzG7Q READY at https://alkhubara-m9pejtjts-mohkhalil.vercel.app. No financial writes or migrations on production.
+- Pending: browser-based role E2E tests, staging database isolation, atomic receipts/ledger single truth, immutable invoiced pricing, invoice lifecycle, secure server-side delete, import atomicity, academic hierarchy and other handoff items.
