@@ -5,11 +5,14 @@ CREATE OR REPLACE FUNCTION experts_private.lock_invoiced_lesson_rates()
 RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path TO ''
 AS $$
 BEGIN
- IF EXISTS (SELECT 1 FROM public.invoices i WHERE i.lesson_id = OLD.lesson_id)
- AND (TG_OP='DELETE' OR NEW.student_hourly_rate IS DISTINCT FROM OLD.student_hourly_rate
-     OR NEW.teacher_hourly_rate IS DISTINCT FROM OLD.teacher_hourly_rate)
- THEN
-    RAISE EXCEPTION 'Invoiced lesson rates cannot be changed without an approved adjustment';
+ IF EXISTS (SELECT 1 FROM public.invoices i WHERE i.lesson_id = OLD.lesson_id) THEN
+   IF TG_OP = 'DELETE' THEN
+     RAISE EXCEPTION 'Invoiced lesson rates cannot be deleted';
+   END IF;
+   IF NEW.student_hourly_rate IS DISTINCT FROM OLD.student_hourly_rate
+      OR NEW.teacher_hourly_rate IS DISTINCT FROM OLD.teacher_hourly_rate THEN
+     RAISE EXCEPTION 'Invoiced lesson rates cannot be changed without an approved adjustment';
+   END IF;
  END IF;
  IF TG_OP='DELETE' THEN RETURN OLD; END IF;
  RETURN NEW;
