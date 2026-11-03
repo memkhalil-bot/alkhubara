@@ -160,6 +160,7 @@ $('form').addEventListener('submit',async e=>{e.preventDefault();if(!canEdit)ret
  if(r.error){$('save').disabled=false;note('فشل الحفظ: '+r.error.message,true);return}
  $('save').disabled=false;clearForm();note('تم حفظ '+(kind==='lessons'?'الحصة':'الخدمة')+' وسعرها بنجاح. الخدمات المكتملة والحصص المؤكدة تنشئ فاتورة مستحقة تلقائياً.');await load()});
 $('collectSave').addEventListener('click',async()=>{if(!canCollect||!editing||kind!=='lessons')return;const amount=Number($('collectAmount').value);if(!(amount>0)||!$('collectStudent').value){note('اختر الطالب وأدخل مبلغ التحصيل',true);return}
+if($('collectMethod').value!=='cash'&&!$('collectRef').value.trim()){note('أدخل رقم مرجع الدفع غير النقدي قبل التحصيل',true);$('collectRef').focus();return}
 if(!confirm('تأكيد استلام '+amount.toFixed(2)+' ر.ق وتسجيلها وربطها بالفاتورة؟'))return;
 $('collectSave').disabled=true;
 const{data,error}=await supabase.rpc('collect_group_lesson_payment',{p_lesson_id:editing,p_student_id:$('collectStudent').value,p_amount:amount,p_method:$('collectMethod').value,p_reference:$('collectRef').value.trim()||null});
