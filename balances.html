@@ -10,7 +10,7 @@ import{createClient}from'https://esm.sh/@supabase/supabase-js@2.57.0';
 const db=createClient('https://uqjoxgcddpwfbjanzqpy.supabase.co',"sb_publishable_-FhtYmDD0qO6mEB2nBE_rQ_j_SE_unY");
 async function getGrants(){const{data,error}=await db.from('user_permissions').select('permission');if(error)throw Error(error.message);return new Set((data||[]).map(x=>x.permission))}
 const $=id=>document.getElementById(id),fmt=n=>Number(n||0).toLocaleString('ar-QA',{minimumFractionDigits:2,maximumFractionDigits:2}),num=n=>Number(n||0);
-async function fetchRows(table,columns){const{data,error}=await db.from(table).select(columns).limit(500);if(error)throw Error(table+': '+error.message);if(data.length>=500)throw Error('عدد سجلات '+table+' تجاوز حد التقرير');return data}
+async function fetchRows(table,columns){const rows=[],pageSize=500;for(let offset=0;;offset+=pageSize){const{data,error}=await db.from(table).select(columns).order('id',{ascending:true}).range(offset,offset+pageSize-1);if(error)throw Error(table+': '+error.message);rows.push(...(data||[]));if(!data||data.length<pageSize)break}return rows}
 function render(id,items){$(id).replaceChildren();for(const p of items){const tr=document.createElement('tr');[p.name,fmt(p.due),fmt(p.paid),fmt(p.due-p.paid)].forEach(x=>{const td=document.createElement('td');td.textContent=x;tr.append(td)});$(id).append(tr)}}
 async function load(){try{$('status').textContent='جارٍ التحميل...';
 const [ss,ts,lessons,services,lessonRates,serviceRates,entries,participants]=await Promise.all([
