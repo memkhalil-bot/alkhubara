@@ -1,0 +1,89 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>التسعير والمستحقات | مركز الخبراء</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{font-family:Cairo,Tahoma,Arial,sans-serif;background:#f5f7f6;color:#173b30}*{box-sizing:border-box}body{margin:0;min-height:100dvh}header{background:#123b38;color:#fff;padding:16px clamp(15px,4vw,35px);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+h1{font-size:clamp(19px,4vw,24px);margin:0}small{color:#c9dfd6}main{max-width:1150px;margin:auto;padding:clamp(12px,3vw,26px)}.panel{background:white;border:1px solid #dae8df;border-radius:14px;padding:clamp(15px,3vw,24px);margin-bottom:15px}h2{font-size:19px;margin:0 0 9px}.sub{color:#62796c;font-size:13px;line-height:1.8}.note{background:#fff7e7;border-right:4px solid #c99b40;padding:14px;border-radius:10px;font-size:13px;line-height:1.8;margin-bottom:15px}
+button{cursor:pointer;border:0;border-radius:9px;background:#12604d;color:white;padding:10px 15px;min-height:44px;font:700 14px Cairo,Tahoma,Arial,sans-serif}button.secondary{background:#e8f2ed;color:#124e3c}button:disabled{opacity:.55;cursor:not-allowed}a{color:inherit}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px}.fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.fields label{font-weight:700;font-size:13px;display:block;margin-bottom:5px}input,select{width:100%;border:1px solid #c7d8cb;border-radius:9px;padding:10px;min-height:46px;font:inherit;font-size:16px;background:#fff;color:#183831}.full{grid-column:1/-1}
+table{border-collapse:collapse;min-width:800px;width:100%}th,td{padding:11px;text-align:right;border-bottom:1px solid #e7eee9;font-size:13px}th{background:#eef6f0}.wrap{overflow-x:auto}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stat{background:#eff6f0;padding:16px;border-radius:12px}.stat strong{font-size:22px;display:block;margin-top:8px}.stat span{font-size:12px;color:#587565}
+#app{display:none}#gate{text-align:center;padding:20px;margin:14vh auto}.error{color:#ab2a2a}.success{color:#187043}.switches{display:flex;gap:8px;margin-bottom:15px}.switches button.selected{background:#12604d;color:white}.msg{min-height:24px;font-size:13px}
+@media(max-width:800px){.fields{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:500px){.fields,.grid{grid-template-columns:1fr}.toolbar{align-items:stretch}.full{grid-column:auto}}
+</style><style>/* Shared embedded-workspace header: title only, no duplicate navigation controls */header{background:transparent!important;color:#193c31!important;border:0!important;padding:12px 4px!important;box-shadow:none!important}header h1{color:#193c31!important;font-size:21px!important}header small,header a,header button,header .toolbar{display:none!important}header{min-height:48px!important}body{background:#f5f7f6}</style><style>
+/* Unified title-only header inside the central workspace */
+header{background:transparent!important;color:#193b30!important;box-shadow:none!important;border:0!important;padding:13px 5px 7px!important;min-height:45px!important}
+header h1{color:#193b30!important;font-size:20px!important;margin:0!important;line-height:1.6!important}
+header small,header .toolbar,header>a,header>button,header>div:not(:first-child){display:none!important}
+header>div:first-child small{display:none!important}
+body{background:#f5f7f6}
+</style><link rel="stylesheet" href="./ux-unified.css"></head><body><div id="gate">جارٍ التحقق من الصلاحيات المالية...</div><div id="app">
+<header><div><h1>التسعير ومستحقات المدرسين</h1><small>مركز الخبراء · صلاحيات مالية محمية</small></div><div class="toolbar"><a href="./dashboard.html"><button class="secondary">لوحة التحكم</button></a><a href="./finance.html"><button class="secondary">دفتر الحركات</button></a><button id="logout" class="secondary">خروج</button></div></header>
+<main><div class="note">أسعار الحصص محفوظة لكل حصة بشكل مستقل؛ تغيير سعر حصة لا يغيّر أسعار الحصص الأخرى. إجمالي المستحقات هنا احتساب تقديري للحصص المكتملة غير الملغاة، ولا يمثل صرفًا أو فاتورة معتمدة. السكرتارية لا يمكنها فتح أو قراءة بيانات التسعير من قاعدة البيانات.</div>
+<div class="panel"><div class="switches"><button id="lessonsBtn" class="selected">أسعار الحصص</button><button id="servicesBtn" class="secondary">أسعار الخدمات</button></div>
+<div class="fields" id="editor"><div><label for="item">اختر الحصة أو الخدمة</label><select id="item"></select></div><div><label for="studentRate" id="priceLabel">سعر ساعة الطالب (ر.ق)</label><input id="studentRate" type="number" min="0" max="1000000" step="0.01" required></div>
+<div id="teacherRateField"><label for="teacherRate">مستحق ساعة المدرس (ر.ق)</label><input id="teacherRate" type="number" min="0" max="1000000" step="0.01" required></div>
+<div class="full"><button id="save">حفظ السعر</button><span class="sub" id="permissions"></span></div></div><div id="msg" class="msg" role="status" aria-live="polite"></div></div>
+<div class="panel"><h2>ملخص أسعار الحصص المكتملة</h2><div class="grid"><div class="stat"><span>قيمة حصص الطلاب</span><strong id="studentTotal">—</strong></div><div class="stat"><span>مستحقات المدرسين المحسوبة</span><strong id="teacherTotal">—</strong></div><div class="stat"><span>الفرق التقديري</span><strong id="margin">—</strong></div></div><p class="sub">الاحتساب يشمل الحصص المكتملة فقط، ويستبعد الملغاة والمؤرشفة والتي لم يُحدد سعرها. لا يطرح التحصيلات أو المدفوعات المسجلة، ولا يشمل التكاليف الإضافية.</p></div>
+<div class="panel"><h2 id="listTitle">تفاصيل أسعار الحصص</h2><p id="count" class="sub"></p><div class="wrap"><table><thead id="thead"></thead><tbody id="rows"></tbody></table></div></div></main></div>
+<script type="module">
+import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.0';
+const supabase=createClient('https://uqjoxgcddpwfbjanzqpy.supabase.co',"sb_publishable_-FhtYmDD0qO6mEB2nBE_rQ_j_SE_unY");
+async function getGrants(client){const{data,error}=await client.from('user_permissions').select('permission');if(error)throw Error(error.message);const allowed=new Set((data||[]).map(x=>x.permission));return key=>allowed.has(key)}
+const $=id=>document.getElementById(id),money=n=>Number(n||0).toLocaleString('ar-QA',{minimumFractionDigits:2,maximumFractionDigits:2});
+let grant=()=>false;let kind='lessons',uid='',role='',items=[],rates=[],students=[],teachers=[];
+const eligible=new Set(['accountant','admin','super_admin']);
+const msg=(s,err=false)=>{$('msg').textContent=s;$('msg').className='msg '+(err?'error':'success')};
+const name=(arr,id)=>arr.find(v=>v.id===id)?.full_name||'—';
+function td(tr,text){const cell=document.createElement('td');cell.textContent=text;tr.append(cell)}
+function heading(arr){const row=document.createElement('tr');for(const val of arr){const th=document.createElement('th');th.textContent=val;row.append(th)}$('thead').replaceChildren(row)}
+async function load(){
+ const isLesson=kind==='lessons';
+ $('listTitle').textContent=isLesson?'تفاصيل أسعار الحصص':'تفاصيل أسعار الخدمات';$('priceLabel').textContent=isLesson?'سعر الحصة لكل طالب (ر.ق) — يعدّل من شاشة الحصة':'قيمة الخدمة (ر.ق)';$('teacherRateField').hidden=!isLesson;$('studentRate').readOnly=isLesson;
+ const [records,prices,part]=await Promise.all([
+ supabase.from(kind==='lessons'?'lessons':'educational_services').select(isLesson?'id,student_id,teacher_id,lesson_date,hours,lesson_mode,lesson_total_price,status,is_archived,subject':'id,student_id,service_date,description,status,is_archived').eq('is_archived',false).order(isLesson?'lesson_date':'service_date',{ascending:false}).limit(500),
+ supabase.from(isLesson?'lesson_rates':'service_prices').select('*').limit(1000),
+ isLesson?supabase.from('lesson_participants').select('lesson_id,student_id,price').limit(1000):Promise.resolve({data:[],error:null})
+ ]);
+ if(records.error||prices.error||part.error){msg('تعذّر تحميل بيانات التسعير: '+(records.error||prices.error||part.error).message,true);return}
+ items=records.data||[];rates=prices.data||[];
+ const select=$('item');select.replaceChildren();const zero=document.createElement('option');zero.value='';zero.textContent='اختر السجل';select.append(zero);
+ for(const item of items){const o=document.createElement('option');o.value=item.id;o.textContent=(item.lesson_date||item.service_date)+' — '+name(students,item.student_id)+' — '+(item.subject||item.description);select.append(o)}
+ heading(isLesson?['التاريخ','الطلاب','المدرس','المادة','الساعات','سعر الحصة للطالب','مستحق المدرس/ساعة','الإجمالي','المستحق']:['التاريخ','الطالب','الوصف','القيمة']);
+ $('rows').replaceChildren();let a=0,b=0,missing=0;const members=new Map();for(const row of part.data||[]){if(!members.has(row.lesson_id))members.set(row.lesson_id,[]);members.get(row.lesson_id).push(row)}
+ for(const item of items){const r=rates.find(p=>(isLesson?p.lesson_id:p.service_id)===item.id),tr=document.createElement('tr');
+ td(tr,item.lesson_date||item.service_date);td(tr,isLesson?(members.get(item.id)||[{student_id:item.student_id}]).map(p=>name(students,p.student_id)).join('، '):name(students,item.student_id));
+ if(isLesson){td(tr,name(teachers,item.teacher_id));td(tr,item.subject);td(tr,item.hours);td(tr,item.lesson_total_price!=null?money(item.lesson_total_price):'غير مسعر');td(tr,r?money(r.teacher_hourly_rate):'غير مسعر');
+ const billed=r?(members.get(item.id)||[]).reduce((sum,p)=>sum+Number(p.price),0):null,due=r?Number(item.hours)*Number(r.teacher_hourly_rate):null;td(tr,billed===null?'—':money(billed));td(tr,due===null?'—':money(due));
+ if(item.status==='completed'&&r){a+=billed;b+=due}else if(item.status==='completed'&&!r)missing++;
+ }else{td(tr,item.description);td(tr,r?money(r.amount):'غير مسعر')}
+ $('rows').append(tr)}
+ $('studentTotal').textContent=money(a)+' ر.ق';$('teacherTotal').textContent=money(b)+' ر.ق';$('margin').textContent=money(a-b)+' ر.ق';
+ $('count').textContent=items.length+' سجل (حد أقصى 500)'+(missing?' · '+missing+' حصة مكتملة بدون سعر':'');
+ $('studentRate').value='';$('teacherRate').value='';
+}
+$('item').addEventListener('change',()=>{const r=rates.find(p=>(kind==='lessons'?p.lesson_id:p.service_id)===$('item').value);$('studentRate').value=r?(kind==='lessons'?(items.find(x=>x.id===$('item').value)?.lesson_total_price??''):r.amount):'';$('teacherRate').value=r?.teacher_hourly_rate??''});
+async function switchKind(next){kind=next;$('lessonsBtn').className=next==='lessons'?'selected':'secondary';$('servicesBtn').className=next==='educational_services'?'selected':'secondary';await load()}
+$('lessonsBtn').onclick=()=>switchKind('lessons');$('servicesBtn').onclick=()=>switchKind('educational_services');
+$('save').addEventListener('click',async()=>{if(role!=='super_admin'&&!grant('pricing.edit'))return;const id=$('item').value;
+ const student=Number($('studentRate').value),teacher=Number($('teacherRate').value);
+ if(!id||(kind!=='lessons'&&!$('studentRate').value)||!Number.isFinite(student)||student<0||student>1000000||(kind==='lessons'&&(!$('teacherRate').value||!Number.isFinite(teacher)||teacher<0||teacher>1000000))){msg('اختر السجل وأدخل الأسعار بشكل صحيح.',true);return}
+ $('save').disabled=true;const isLesson=kind==='lessons';
+ const table=isLesson?'lesson_rates':'service_prices',pk=isLesson?'lesson_id':'service_id';
+ const payload=isLesson?{teacher_hourly_rate:teacher}:{amount:student};
+ const exists=rates.some(r=>r[pk]===id);let result;
+ if(isLesson&&!exists){msg('سجل سعر الحصة غير موجود. افتح الحصة وحدد سعر الطالب أولًا.',true);$('save').disabled=false;return}
+ if(exists)result=await supabase.from(table).update({...payload,updated_by:uid}).eq(pk,id);
+ else result=await supabase.from(table).insert({...payload,[pk]:id,created_by:uid,updated_by:uid});
+ $('save').disabled=false;if(result.error){msg('فشل حفظ التسعير: '+result.error.message,true);return}
+ msg('تم حفظ السعر وتسجيل العملية في سجل المراجعة.');await load();$('item').value=id;
+});
+$('logout').addEventListener('click',async()=>{await supabase.auth.signOut();location.replace('./login.html')});
+(async()=>{try{const {data:{user},error}=await supabase.auth.getUser();if(error||!user)throw Error('signin');uid=user.id;
+ const {data:profile,error:pe}=await supabase.from('staff_profiles').select('role,is_active').eq('user_id',uid).single();
+ if(pe||!profile?.is_active)throw Error('permission');role=profile.role;grant=await getGrants(supabase);if(role!=='super_admin'&&!grant('pricing.view')&&!grant('pricing.edit'))throw Error('permission');
+ const [s,t]=await Promise.all([supabase.from('students').select('id,full_name').limit(1000),supabase.from('teachers').select('id,full_name').limit(1000)]);
+ if(s.error||t.error)throw Error('lookup');
+ students=s.data||[];teachers=t.data||[];$('save').hidden=role!=='super_admin'&&!grant('pricing.edit');
+ if(role!=='super_admin'&&!grant('pricing.edit')){$('permissions').textContent=' · صلاحية المحاسب: عرض فقط';$('studentRate').disabled=true;$('teacherRate').disabled=true;$('item').disabled=true}
+ $('gate').hidden=true;$('app').style.display='block';await load()
+ }catch(e){location.replace('./dashboard.html')}})();
+</script><script src="./table-enhancements.js" defer></script></body></html>
