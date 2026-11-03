@@ -48,3 +48,9 @@ Read-only examination of public.delete_person_safely showed that it performs har
 - database/pending/20261103_h03_lockdown_delete_person.sql: pending draft, not applied.
 - Verified existing trigger guards for source pricing and receipt allocation, and verified pending_review is set by teacher_lessons_submit.
 - Vercel preview READY: dpl_5NFZ4p7ik7uaDHJrEKAhcZGShYhH. No production deployment or database migration.
+
+## 2026-11-03 further implementation
+- Audited live trigger functions for invoice creation, pricing locks, and receipt allocation. Backend already enforces matching student, remaining receipt and invoice amounts, and protects source pricing after invoice creation. Do not duplicate these rules.
+- H-05 UX guard: finance.html and operations.html now require an external transaction reference for noncash payments, preventing accidental reference-free entries through these forms. Server-side validation is NOT yet standardized across all receipt methods.
+- Three touched JavaScript pages parsed successfully; preview deployment dpl_6vW6PGcAXVukCzTewop84kR3UiA2 is READY. Preview: https://alkhubara-6dhjxstux-mohkhalil.vercel.app.
+- H-05 idempotency, H-04 unified balances, H-03 hard-delete RPC revocation and end-to-end staging tests remain open. No production database changes and no production deployment in this pass.
