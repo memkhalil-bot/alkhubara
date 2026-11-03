@@ -99,7 +99,7 @@ function nameOf(items,id){return items.find(x=>x.id===id)?.full_name||'—'}
 function studentTableLabel(id){const s=students.find(x=>x.id===id);return s?'طالب #'+s.student_code:'طالب (رقم غير متاح)'}
 function anonymizeStudentText(v){let t=String(v??'—');for(const s of students){if(s.full_name&&s.full_name.length>=2)t=t.split(s.full_name).join(studentTableLabel(s.id))}return t}
 function textCell(tr,content){const td=document.createElement('td');td.textContent=anonymizeStudentText(content);tr.append(td);return td}
-function toggleCancellation(){const cancelled=kind==='lessons'&&$('statusInput').value==='cancelled';$('cancelReasonField').hidden=!cancelled;$('cancelReason').required=cancelled}
+function toggleCancellation(){const cancelled=kind==='lessons'&&$('statusInput').value==='cancelled';$('cancelReasonField').hidden=!cancelled;$('cancelReason').required=cancelled;$('paymentTermsField').hidden=!(kind==='lessons'&&$('statusInput').value==='completed');toggleCredit()}
 $('statusInput').addEventListener('change',toggleCancellation);
 function toggleCredit(){const credit=$('paymentTerms').value==='credit',due=$('dueDate'),date=$('date').value;due.parentElement.hidden=!credit;due.required=credit;due.min=date||'';due.max=addDays(date,30);if(credit&&date&&!due.value&&!editing)due.value=addDays(date,30)}
 function addDays(date,days){if(!date)return '';const d=new Date(date+'T12:00:00');d.setDate(d.getDate()+days);return d.toLocaleDateString('en-CA')}
