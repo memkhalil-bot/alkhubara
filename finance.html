@@ -57,6 +57,7 @@ body{background:#f5f7f6}
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.0';
 const supabase=createClient('https://uqjoxgcddpwfbjanzqpy.supabase.co',"sb_publishable_-FhtYmDD0qO6mEB2nBE_rQ_j_SE_unY");
 async function getGrants(client){const{data,error}=await client.from('user_permissions').select('permission');if(error)throw Error(error.message);const allowed=new Set((data||[]).map(x=>x.permission));return key=>allowed.has(key)}
+const qatarToday=()=>{const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Qatar',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const value=type=>parts.find(p=>p.type===type)?.value;return `${value('year')}-${value('month')}-${value('day')}`};
 const $=id=>document.getElementById(id);let uid='',students=[],teachers=[],entries=[],role='',grant=()=>false;
 
 let activeFinanceTab='income';
@@ -97,13 +98,13 @@ async function loadExpenses(){
  if(!td.childNodes.length)td.textContent='—';tr.append(td);body.append(tr)}
  if(!data?.length){const tr=document.createElement('tr');const td=cell(tr,'لا توجد طلبات مصروفات');td.colSpan=6;body.append(tr)}
 }
-function resetExpenseEdit(){editingExpenseId=null;$('submitExpense').textContent='إرسال طلب اعتماد';$('cancelExpenseEdit').hidden=true;$('expenseCreate').classList.remove('edit-mode');for(const key of ['expenseCategory','expenseAmount','expenseDescription','expenseReference','beneficiaryName'])$(key).value='';$('expenseDate').value=new Date().toLocaleDateString('en-CA');$('expenseMethod').value='bank'}
+function resetExpenseEdit(){editingExpenseId=null;$('submitExpense').textContent='إرسال طلب اعتماد';$('cancelExpenseEdit').hidden=true;$('expenseCreate').classList.remove('edit-mode');for(const key of ['expenseCategory','expenseAmount','expenseDescription','expenseReference','beneficiaryName'])$(key).value='';$('expenseDate').value=qatarToday();$('expenseMethod').value='bank'}
 function startExpenseEdit(r){editingExpenseId=r.id;$('expenseDate').value=r.request_date;$('expenseCategory').value=r.category;$('expenseAmount').value=r.amount;$('expenseDescription').value=r.description;$('expenseMethod').value=r.payment_method;$('expenseReference').value=r.reference_number||'';$('beneficiaryName').value=r.beneficiary_name||'';$('submitExpense').textContent='حفظ تعديل طلب المصروف';$('cancelExpenseEdit').hidden=false;$('expenseCreate').classList.add('edit-mode');$('expenseCreate').scrollIntoView({behavior:'smooth',block:'start'})}
 $('cancelExpenseEdit').onclick=resetExpenseEdit;
 $('submitExpense').onclick=async()=>{
  const amount=Number($('expenseAmount').value),category=$('expenseCategory').value.trim(),description=$('expenseDescription').value.trim();
  if(!(amount>0)||category.length<2||description.length<3||$('beneficiaryName').value.trim().length<2){$('expenseMessage').textContent='أدخل البند والمبلغ واسم المستفيد والبيان بصورة صحيحة';return}
- $('submitExpense').disabled=true;const saved=await expenseAction(editingExpenseId,editingExpenseId?'edit':'submit',{request_date:$('expenseDate').value||new Date().toLocaleDateString('en-CA'),category,description,amount,payment_method:$('expenseMethod').value,reference_number:$('expenseReference').value.trim(),beneficiary_name:$('beneficiaryName').value.trim()});$('submitExpense').disabled=false;if(saved)resetExpenseEdit()
+ $('submitExpense').disabled=true;const saved=await expenseAction(editingExpenseId,editingExpenseId?'edit':'submit',{request_date:$('expenseDate').value||qatarToday(),category,description,amount,payment_method:$('expenseMethod').value,reference_number:$('expenseReference').value.trim(),beneficiary_name:$('beneficiaryName').value.trim()});$('submitExpense').disabled=false;if(saved)resetExpenseEdit()
 };
 $('expenseReload').onclick=loadExpenses;
 async function loadCredits(){
@@ -130,7 +131,7 @@ async function loadCredits(){
  $('creditCount').textContent=rows.length+' فاتورة آجلة · '+unbilled.length+' بانتظار الفوترة';const body=$('creditRows');body.replaceChildren();
  for(const {inv,src,balance} of rows){const tr=document.createElement('tr');const name=studentLabel(inv.student_id);
  const paidAmount=paid.get(inv.id)||0;const due=src.due_date||'—';
- const state=balance<=0?'محصل':paidAmount>0?'محصل جزئيًا':(due!=='—'&&due<new Date().toISOString().slice(0,10)?'متأخر':'آجل');
+ const state=balance<=0?'محصل':paidAmount>0?'محصل جزئيًا':(due!=='—'&&due<qatarToday()?'متأخر':'آجل');
  for(const value of [name,redactStudentNames(src.subject||src.description),inv.invoice_no,due,money(inv.amount),money(paidAmount),money(balance),state])cell(tr,value);const actions=cell(tr,'');if(financeEditor()){const link=document.createElement('a');link.href='./invoices.html';link.textContent='مراجعة / تصحيح الفاتورة';link.onclick=ev=>{if(window.parent!==window){ev.preventDefault();parent.postMessage({type:'alkhubara:navigate',route:'invoices'},location.origin)}};actions.append(link)}else actions.textContent='عرض فقط';body.append(tr)}
  for(const {src,kind,student_id,price} of unbilled){const tr=document.createElement('tr');const name=studentLabel(student_id);
  for(const value of [name,redactStudentNames(kind+' — '+(src.subject||src.description||'—')),'لم تُصدر',src.due_date||'—',price!=null?money(price):'لم يُسعَّر بعد','—',price!=null?money(price):'—','بانتظار الفوترة'])cell(tr,value);const td=cell(tr,'');const link=document.createElement('a');link.href='./operations.html';link.textContent='فتح المصدر للتعديل';link.onclick=ev=>{if(window.parent!==window){ev.preventDefault();parent.postMessage({type:'alkhubara:navigate',route:'operations'},location.origin)}};td.append(link);
@@ -174,7 +175,7 @@ async function load(){
    const b=document.createElement('button');b.type='button';b.className='secondary';b.textContent='حذف / إلغاء';b.addEventListener('click',()=>reverse(e,b));td.append(b)
   }else td.textContent=e.entry_type==='reversal'?'تصحيح':'معكوس';tr.append(td);$('rows').append(tr)}
 }
-function resetEntryEdit(){editingEntry=null;$('form').reset();$('entry_date').value=new Date().toLocaleDateString('en-CA');$('save').textContent='حفظ القيد المالي';$('cancelEntryEdit').hidden=true;$('form').classList.remove('edit-mode');$('entry_type').disabled=false;setType()}
+function resetEntryEdit(){editingEntry=null;$('form').reset();$('entry_date').value=qatarToday();$('save').textContent='حفظ القيد المالي';$('cancelEntryEdit').hidden=true;$('form').classList.remove('edit-mode');$('entry_type').disabled=false;setType()}
 function startEntryEdit(e){if(e.entry_type!=='receipt'&&e.entry_type!=='teacher_payment'){msg('تصحيح المصروفات يتم من مسار طلبات الصرف للحفاظ على الاعتماد',true);return}showFinanceTab(e.entry_type==='receipt'?'income':'dues');editingEntry=e;$('entry_type').value=e.entry_type;setType();$('entry_type').disabled=true;$('entry_date').value=e.entry_date;$('amount').value=e.amount;$('category').value=e.category;$('description').value=e.description||'';$('reference_number').value=e.reference_number||'';$('payment_method').value=e.payment_method||'cash';if(e.student_id)$('student_id').value=e.student_id;if(e.teacher_id)$('teacher_id').value=e.teacher_id;$('save').textContent='حفظ التصحيح المالي';$('cancelEntryEdit').hidden=false;$('form').classList.add('edit-mode');$('form').scrollIntoView({behavior:'smooth',block:'start'})}
 $('cancelEntryEdit').onclick=resetEntryEdit;
 async function reverse(entry,button){
@@ -204,6 +205,6 @@ $('logout').addEventListener('click',async()=>{await supabase.auth.signOut();loc
  const {data:profile,error:pe}=await supabase.from('staff_profiles').select('full_name,role,is_active').eq('user_id',uid).single();
  if(pe||!profile?.is_active)throw Error('unauthorized');grant=await getGrants(supabase);role=profile.role;if(profile.role!=='super_admin'&&!grant('finance.view')&&!grant('finance.edit'))throw Error('unauthorized');
  $('who').textContent=(profile.full_name||user.email)+' · '+(roleLabels[profile.role]||'موظف مالي');$('form').hidden=profile.role!=='super_admin'&&!grant('finance.edit');
- $('state').hidden=true;$('app').style.display='block';$('entry_date').value=new Date().toLocaleDateString('en-CA');setType();showFinanceTab('income');await loadPeople();await Promise.all([load(),loadExpenses(),loadCredits()]);$('expenseCreate').hidden=!financeEditor();$('expenseDate').value=new Date().toLocaleDateString('en-CA');
+ $('state').hidden=true;$('app').style.display='block';$('entry_date').value=qatarToday();setType();showFinanceTab('income');await loadPeople();await Promise.all([load(),loadExpenses(),loadCredits()]);$('expenseCreate').hidden=!financeEditor();$('expenseDate').value=qatarToday();
  }catch(e){location.replace('./dashboard.html')}})();
 </script><script src="./table-enhancements.js" defer></script></body></html>
