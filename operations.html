@@ -107,14 +107,14 @@ $('lessonMode').addEventListener('change',()=>{configure();$('student_id').value
 $('date').addEventListener('change',toggleCredit);
 $('paymentTerms').addEventListener('change',toggleCredit);
 function configure(){
- const lesson=kind==='lessons';
+ const lesson=kind==='lessons',previousStatus=$('statusInput').value;
  for(const id of ['lessonModeField','timeField','endTimeField','hoursField','locationField','subjectField','lessonPriceField','notesField'])$(id).hidden=!lesson;
  for(const id of ['serviceTypeField','descriptionField','servicePriceField'])$(id).hidden=lesson;$('servicePrice').required=!lesson;
  $('studentField').hidden=lesson&&$('lessonMode').value==='group';$('groupStudentField').hidden=!lesson||$('lessonMode').value!=='group';$('student_id').required=!lesson||$('lessonMode').value==='individual';$('teacherField').hidden=!lesson&&$('service_type').value!=='homework';$('teacher_id').required=lesson||$('service_type').value==='homework';$('start_time').required=lesson;$('end_time').required=lesson;$('hours').required=false;$('subject').required=lesson;$('description').required=!lesson;
  $('statusInput').replaceChildren();
- for(const [value,label] of (lesson?[['scheduled','مجدولة'],['confirmed','مؤكدة'],['pending_review','بانتظار مراجعة الإدارة'],['completed','تمت'],['cancelled','ملغاة']]:[['new','جديد'],['in_progress','جارٍ التنفيذ'],['completed','مكتمل'],['cancelled','ملغاة']])){const op=document.createElement('option');op.value=value;op.textContent=label;$('statusInput').append(op)}
+ for(const [value,label] of (lesson?[['scheduled','مجدولة'],['confirmed','مؤكدة'],['pending_review','بانتظار مراجعة الإدارة'],['completed','تمت'],['cancelled','ملغاة']]:[['new','جديد'],['in_progress','جارٍ التنفيذ'],['completed','مكتمل'],['cancelled','ملغاة']])){const op=document.createElement('option');op.value=value;op.textContent=label;$('statusInput').append(op)}if([...$('statusInput').options].some(o=>o.value===previousStatus))$('statusInput').value=previousStatus;
  $('formTitle').textContent=lesson?'إضافة حصة':'إضافة خدمة تعليمية';$('tableTitle').textContent=lesson?'سجل الحصص':'سجل الخدمات';$('save').textContent=lesson?'حفظ الحصة':'حفظ الخدمة';$('search').placeholder=lesson?'بحث بالطالب أو المدرس أو المادة...':'بحث بالطالب أو وصف الخدمة...';
- const cols=lesson?['التاريخ','الطالب','المدرس','المادة','البداية','النهاية','الساعات','الحالة','السداد','الإجراءات']:['التاريخ','الطالب','نوع الخدمة','الوصف','الحالة','السداد','الإجراءات'];
+ const cols=lesson?['التاريخ','الطالب','المدرس','المادة','البداية','النهاية','الساعات','الحالة','السداد','الإجراءات']:['التاريخ','الطالب','المدرس','نوع الخدمة','الوصف','الحالة','السداد','الإجراءات'];
  $('head').replaceChildren();cols.forEach(x=>{const th=document.createElement('th');th.textContent=x;$('head').append(th)});
  $('noPeople').hidden=students.length>0 && (!lesson||teachers.length>0);toggleCredit();toggleCancellation();
 }
@@ -142,10 +142,10 @@ function render(){
  const q=$('search').value.trim().toLocaleLowerCase('ar'),date=$('dateFilter').value;
  const filtered=records.filter(r=>{const hay=[...(r.participants||[r.student_id]).map(id=>nameOf(students,id)),nameOf(teachers,r.teacher_id),r.subject,r.description,serviceLabels[r.service_type]].join(' ').toLocaleLowerCase('ar');return (!q||hay.includes(q))&&(!date||(r.lesson_date||r.service_date)===date)});
  $('count').textContent=filtered.length+' سجل مطابق';$('rows').replaceChildren();
- if(!filtered.length){const tr=document.createElement('tr');const td=textCell(tr,'لا توجد سجلات مطابقة');td.colSpan=kind==='lessons'?10:7;$('rows').append(tr);return}
+ if(!filtered.length){const tr=document.createElement('tr');const td=textCell(tr,'لا توجد سجلات مطابقة');td.colSpan=kind==='lessons'?10:8;$('rows').append(tr);return}
  for(const rec of filtered){const tr=document.createElement('tr');textCell(tr,rec.lesson_date||rec.service_date);textCell(tr,kind==='lessons'&&rec.lesson_mode==='group'?(rec.participants||[rec.student_id]).map(id=>studentTableLabel(id)).join('، '):studentTableLabel(rec.student_id));
   if(kind==='lessons'){textCell(tr,nameOf(teachers,rec.teacher_id));textCell(tr,rec.subject);textCell(tr,rec.start_time?.slice(0,5));textCell(tr,rec.end_time?.slice(0,5));textCell(tr,rec.hours)}
-  else{textCell(tr,serviceLabels[rec.service_type]);textCell(tr,rec.description)}
+  else{textCell(tr,nameOf(teachers,rec.teacher_id));textCell(tr,serviceLabels[rec.service_type]);textCell(tr,rec.description)}
   textCell(tr,(statusLabels[rec.status]||rec.status)+(rec.status==='cancelled'&&rec.cancellation_reason?' — '+rec.cancellation_reason:''));textCell(tr,paymentLabels[rec.payment_status]||rec.payment_status);
   const td=document.createElement('td');td.className='actions';
   if(canEdit){const b=document.createElement('button');b.className='secondary';b.type='button';b.textContent='تعديل';b.addEventListener('click',()=>edit(rec));td.append(b);
