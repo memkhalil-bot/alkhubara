@@ -88,7 +88,7 @@ $('collectHint').textContent=!priceData.length?'الحصة تحتاج تسعير
 $('collectSave').disabled=!priceData.length||r?.payment_status==='paid';
 if(priceData.length){const ids=r.participants||[r.student_id];const options=ids.map(id=>({id,full_name:nameOf(students,id)}));option($('collectStudent'),options);const fallback=r.lesson_total_price!=null?Number(r.lesson_total_price):(Number(priceData[0].student_hourly_rate)*Number(r.hours));const netByStudent=new Map();if(ready&&canCollect){const{data:inv,error:invoiceError}=await supabase.from('invoices').select('student_id,amount').eq('lesson_id',r.id);if(editing!==r.id)return;if(invoiceError){$('collectHint').textContent='تعذر قراءة صافي الفاتورة؛ تحقق من مبلغ الفاتورة قبل التحصيل';$('collectAmount').value='';return}for(const i of inv||[])netByStudent.set(i.student_id,Number(i.amount));$('collectHint').textContent='المبلغ المقترح هو صافي الفاتورة بعد الخصم المعتمد، وقد يحتاج تقليلًا إذا سبق سداد جزء منه'}function setNet(){const id=$('collectStudent').value;$('collectAmount').value=netByStudent.has(id)?netByStudent.get(id).toFixed(2):(ready&&canCollect?'':fallback.toFixed(2))} $('collectStudent').onchange=setNet;setNet()}}
 
-const roleLabels={secretary:'سكرتارية',accountant:'محاسب',admin:'مدير',super_admin:'مدير عام'};
+const roleLabels={teacher:'مدرس',secretary:'سكرتارية',accountant:'محاسب',admin:'مدير',super_admin:'مدير عام'};
 const statusLabels={scheduled:'مجدولة',confirmed:'مؤكدة',pending_review:'بانتظار مراجعة الإدارة',completed:'تمت',cancelled:'ملغاة',new:'جديد',in_progress:'جارٍ التنفيذ'};
 const paymentLabels={unpaid:'غير مدفوع',partial:'جزئيًا',paid:'مدفوع'};
 const serviceLabels={homework:'واجب',research:'بحث',project:'مشروع',other:'أخرى'};
