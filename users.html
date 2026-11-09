@@ -24,7 +24,7 @@ const sb=createClient('https://uqjoxgcddpwfbjanzqpy.supabase.co',"sb_publishable
 const groups=[
  ['الرئيسية',[['executive.view','عرض المؤشرات التنفيذية']]],
  ['الإدارة التعليمية',[['students.view','عرض الطلاب'],['students.edit','إدارة الطلاب'],['teachers.view','عرض المدرسين'],['teachers.edit','إدارة المدرسين'],['lessons.view','عرض الحصص'],['lessons.edit','إدارة الحصص'],['services.view','عرض الخدمات'],['services.edit','إدارة الخدمات'],['teacher.portal','بوابة المدرس']]],
- ['الإدارة المالية',[['finance.view','عرض الإيرادات والمصروفات'],['finance.edit','إدارة الإيرادات والمصروفات'],['pricing.view','عرض التسعير والمستحقات'],['pricing.edit','إدارة التسعير'],['invoices.view','عرض الفواتير'],['invoices.create','إصدار الفواتير'],['invoices.allocate','توزيع التحصيلات']]],
+ ['الإدارة المالية',[['finance.view','عرض الإيرادات والمصروفات'],['finance.edit','إدارة الإيرادات والمصروفات'],['pricing.view','عرض التسعير والمستحقات'],['pricing.edit','إدارة التسعير'],['teacher_commissions.view','عرض نسب المركز والمدرسين'],['teacher_commissions.edit','تعديل نسب المركز والمدرسين'],['invoices.view','عرض الفواتير'],['invoices.create','إصدار الفواتير'],['invoices.allocate','توزيع التحصيلات']]],
  ['التقارير والإدارة',[['reports.view','التقارير التشغيلية'],['audit.view','سجل العمليات'],['contacts.reveal','كشف بيانات الاتصال الكاملة']]]
 ];
 const labels=Object.fromEntries(groups.flatMap(g=>g[1]));let accounts=[],permissions=[],editing=null,authUser=null;
