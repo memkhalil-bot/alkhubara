@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>نِسَب المركز والمدرسين | الخبراء التعليمي</title>
+<style>
+:root{font-family:Cairo,Tahoma,Arial,sans-serif;color:#183d34;background:#f5f7f6}
+*{box-sizing:border-box}body{margin:0}main{max-width:1150px;margin:auto;padding:24px}
+h1{font-size:26px}h2{font-size:19px}.card{padding:20px;background:white;border:1px solid #d7e6de;border-radius:14px;margin:16px 0}
+p{line-height:1.85}input,select,button{font:inherit;padding:11px;border:1px solid #c8d9ce;border-radius:9px;min-height:44px}
+input,select{width:100%}button{cursor:pointer;background:#11634d;color:white;border:0;font-weight:700}
+button:disabled{opacity:.5;cursor:not-allowed}.secondary{background:#eaf3ed;color:#124d3d;text-decoration:none;display:inline-block;padding:11px 14px;border-radius:9px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}label{display:block;font-weight:700;margin-bottom:8px}
+.muted{color:#60796a;font-size:13px}.scroll{overflow:auto}table{width:100%;min-width:720px;border-collapse:collapse}th,td{text-align:right;border-bottom:1px solid #e4eee8;padding:12px}th{background:#eaf3ed}
+.status{margin:12px 0;min-height:25px}.error{color:#ac2929}.good{color:#146b45}
+@media(max-width:700px){main{padding:12px}.grid{grid-template-columns:1fr}h1{font-size:21px}}
+</style><link rel="stylesheet" href="./ux-unified.css"></head>
+<body><main>
+<p><a class="secondary" href="./dashboard.html">العودة للإدارة المالية</a></p>
+<h1>نِسَب المركز والمدرسين</h1>
+<p class="muted">لكل مدرس نسبة مختلفة للحصص والواجبات. نسبة المدرس = 100% − نسبة المركز. تُحسب الحصة أو الواجب على صافي الفاتورة بعد الخصم وتُثبّت النسبة عند اعتماد الاكتمال، ولا يتغير المستحق التاريخي عند تعديل اتفاق المدرس.</p>
+<div id="state" role="status">جارٍ التحقق من صلاحياتك...</div>
+<section id="app" hidden>
+<div class="card" id="editPanel" hidden>
+<h2>تسجيل أو تعديل نسبة مدرس</h2>
+<div class="grid">
+<div><label for="teacher">المدرس</label><select id="teacher"></select></div>
+<div><label for="category">نوع العمل</label><select id="category"><option value="lesson">الحصص التعليمية</option><option value="homework">الواجبات</option></select></div>
+<div><label for="center">نسبة المركز (%)</label><input id="center" type="number" min="0" max="100" step="0.01" required placeholder="أدخل النسبة المتفق عليها"></div>
+<div><label for="teacherShare">نسبة المدرس (%) — تلقائية</label><input id="teacherShare" readonly></div>
+</div><p class="muted">النسب هنا تخص العمليات الجديدة عند اكتمالها، ولا تعدل الفواتير أو المستحقات المعتمدة سابقًا. إذا لم تُحدّد النسبة، لا يمكن اعتماد اكتمال الحصة أو الواجب.</p>
+<button id="save">حفظ النسبة</button><p id="saveStatus" class="status" role="status"></p>
+</div>
+<div class="card"><h2>اتفاقات المدرسين الحالية</h2><p class="muted">«غير محددة» تعني أن هذا النوع يحتاج نسبة قبل اعتماد أي عمل مكتمل.</p>
+<div class="scroll"><table><thead><tr><th>المدرس</th><th>المركز — الحصص</th><th>المدرس — الحصص</th><th>المركز — الواجبات</th><th>المدرس — الواجبات</th><th>الإجراء</th></tr></thead><tbody id="rows"></tbody></table></div>
+<p id="listStatus" class="status"></p></div>
+</section></main>
+<script type="module">
+import{createClient}from'https://esm.sh/@supabase/supabase-js@2.57.0';
+const db=createClient('https://uqjoxgcddpwfbjanzqpy.supabase.co','sb_publishable_-FhtYmDD0qO6mEB2nBE_rQ_j_SE_unY');
+const $=id=>document.getElementById(id);
+let rows=[],canEdit=false;
+const pct=value=>value==null?'غير محددة':Number(value).toLocaleString('ar-QA',{maximumFractionDigits:2})+'%';
+const info=(text,isError=false)=>{$('saveStatus').textContent=text;$('saveStatus').className='status '+(isError?'error':'good')};
+function refreshRate(){const v=$('center').value.trim();$('teacherShare').value=v===''?'':Number.isFinite(Number(v))?(100-Number(v)).toFixed(2):''}
+$('center').addEventListener('input',refreshRate);
+function choose(teacher,category){$('teacher').value=teacher;$('category').value=category;const row=rows.find(x=>x.id===teacher);$('center').value=row?.[category]??'';refreshRate();$('center').focus()}
+function render(){const body=$('rows');body.replaceChildren();$('teacher').replaceChildren(new Option('اختر مدرسًا',''));
+for(const row of rows){$('teacher').add(new Option((row.code||'')+' — '+row.name,row.id));const tr=document.createElement('tr');
+const values=[row.name,pct(row.lesson),pct(row.lesson==null?null:100-Number(row.lesson)),pct(row.homework),pct(row.homework==null?null:100-Number(row.homework))];
+for(const v of values){const td=document.createElement('td');td.textContent=v;tr.append(td)}
+const td=document.createElement('td');if(canEdit){for(const [kind,title] of [['lesson','حصص'],['homework','واجبات']]){const b=document.createElement('button');b.className='secondary';b.textContent='تعديل '+title;b.style.margin='3px';b.onclick=()=>choose(row.id,kind);td.append(b)}}else td.textContent='عرض فقط';tr.append(td);body.append(tr)}
+$('listStatus').textContent='عدد المدرسين: '+rows.length;
+}
+async function load(){const{data,error}=await db.rpc('list_teacher_commission_rules');if(error)throw error;rows=data||[];render()}
+$('save').onclick=async()=>{const teacher=$('teacher').value,category=$('category').value,raw=$('center').value;
+if(!canEdit)return info('لا تملك صلاحية التعديل',true);
+if(!teacher||raw.trim()===''||!Number.isFinite(Number(raw))||Number(raw)<0||Number(raw)>100||Math.round(Number(raw)*100)!==Number(raw)*100)return info('اختر المدرس ونسبة بين 0 و100 بدقة منزلتين عشريتين',true);
+if(!confirm('حفظ نسبة المركز '+raw+'%، ونسبة المدرس '+(100-Number(raw)).toFixed(2)+'% لهذا النوع؟'))return;
+$('save').disabled=true;
+const{error}=await db.rpc('set_teacher_commission_rule',{p_teacher:teacher,p_category:category,p_center_percent:Number(raw)});
+$('save').disabled=false;if(error)return info('تعذر الحفظ: '+error.message,true);
+info('تم الحفظ وتسجيل التغيير في سجل التدقيق.');await load();$('teacher').value=teacher;$('category').value=category;$('center').value=raw;refreshRate();
+};
+(async()=>{try{const{data:{user}}=await db.auth.getUser();if(!user)throw Error('سجل الدخول أولًا');
+const{data:p,error}=await db.from('staff_profiles').select('role,is_active,deleted_at').eq('user_id',user.id).single();if(error||!p?.is_active||p.deleted_at)throw Error('الحساب غير نشط');
+const{data:grants,error:pe}=await db.from('user_permissions').select('permission').eq('user_id',user.id);if(pe)throw pe;
+const permissions=new Set((grants||[]).map(x=>x.permission));
+canEdit=p.role==='super_admin'||permissions.has('teacher_commissions.edit');
+if(!canEdit&&!permissions.has('teacher_commissions.view'))throw Error('لا تملك صلاحية عرض نسب المدرسين');
+$('editPanel').hidden=!canEdit;$('app').hidden=false;await load();$('state').textContent='';
+}catch(e){$('state').textContent='غير مصرح: '+e.message}})();
+</script></body></html>
