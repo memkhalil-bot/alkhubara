@@ -27,7 +27,20 @@ header h1{color:#193b30!important;font-size:20px!important;margin:0!important;li
 header small,header .toolbar,header>a,header>button,header>div:not(:first-child){display:none!important}
 header>div:first-child small{display:none!important}
 body{background:#f5f7f6}
-</style><link rel="stylesheet" href="./ux-unified.css"><style>.service-academic-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:12px;background:#f4f9f5;border-radius:12px;border:1px solid #d8e8dd}@media(max-width:700px){.service-academic-grid{grid-template-columns:1fr}}</style></head><body>
+</style><link rel="stylesheet" href="./ux-unified.css"><style>.service-academic-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:12px;background:#f4f9f5;border-radius:12px;border:1px solid #d8e8dd}@media(max-width:700px){.service-academic-grid{grid-template-columns:1fr}}</style><style>
+.secretary-entry{border-top:4px solid #116148}.form-header{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:16px}
+.form-header h2{margin:0}.form-header p{margin:0}
+#app main>.panel:first-child{background:#fff;position:relative}
+#app .tabs{gap:10px}#app .tabs button{border:1px solid #bad7c5;background:#f0f7f2;color:#215742;border-radius:12px;min-height:48px;font-size:14px}
+#app .tabs button.active{background:#116148;color:#fff;box-shadow:0 4px 11px #0b5e3a20}
+.secretary-entry .fields{row-gap:17px}.secretary-entry label{font-size:13px}
+.secretary-entry .fields>div{min-width:0}
+.secretary-entry input,.secretary-entry select{min-height:48px;border-radius:10px}
+#search{min-width:220px;max-width:330px}#dateFilter{min-width:160px}
+#tableTitle{margin-bottom:4px}.tablewrap{border:1px solid #e0ebe3;border-radius:10px}
+#rows tr:hover{background:#eff7f1}#head th{position:sticky;top:0;background:#e9f3ec;z-index:1}
+@media(max-width:650px){.form-header{display:block}.form-header p{margin-top:6px}#app .tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}#app .tabs button{padding:9px 6px;font-size:12px}#search,#dateFilter{width:100%;max-width:none;min-width:0}.toolbar input{flex:1 1 100%}.secretary-entry .fields{gap:13px}}
+</style></head><body>
 <div id="state" role="status">جارٍ التحقق من الحساب والصلاحيات...</div>
 <div id="app"><header><div><h1>🎓 الحصص والخدمات التعليمية</h1><small>مركز الخبراء التعليمي · قاعدة البيانات الفعلية</small></div>
 <div class="toolbar"><a href="./dashboard.html"><button type="button" class="secondary">لوحة التحكم</button></a><button id="logout" type="button" class="secondary">تسجيل الخروج</button></div></header>
@@ -37,8 +50,8 @@ body{background:#f5f7f6}
 <button id="lessonsTab" type="button" data-kind="lessons" class="active" role="tab" aria-selected="true">الحصص الدراسية</button>
 <button id="servicesTab" type="button" data-kind="educational_services" role="tab" aria-selected="false">الخدمات التعليمية</button>
 </div></div></div>
-<div id="editor" class="panel">
-<h2 id="formTitle">إضافة حصة</h2><form id="form" class="fields">
+<div id="editor" class="panel secretary-entry">
+<div class="form-header"><h2 id="formTitle">إضافة حصة</h2><p class="muted">أكمل بيانات الطالب والمادة والسعر ثم احفظ. يمكنك مراجعة السجلات من القسم التالي.</p></div><form id="form" class="fields">
 <div><label for="date">التاريخ *</label><input id="date" name="date" type="date" required></div>
 <div id="lessonModeField"><label for="lessonMode">نوع الحصة *</label><select id="lessonMode"><option value="individual">فردية</option><option value="group">جماعية</option></select></div><div id="studentField"><label for="student_id">الطالب *</label><select id="student_id" required></select></div><div class="wide" id="groupStudentField" hidden><label for="groupStudents">الطلاب المشاركون (2–10) *</label><select id="groupStudents" size="6" multiple aria-describedby="groupHint"></select><small class="muted" id="groupHint">يمكن تحديد عدة أسماء باستخدام Ctrl أو باللمس. السعر أدناه لكل طالب.</small></div>
 <div id="teacherField"><label for="teacher_id">المدرس *</label><select id="teacher_id"></select></div>
@@ -181,7 +194,9 @@ function render(){
 }
 function edit(r){editing=r.id;if(kind==='lessons'){$('lessonMode').value=r.lesson_mode||'individual';configure();const selected=r.participants||[r.student_id];for(const o of $('groupStudents').options)o.selected=selected.includes(o.value);groupPicker.refresh()}$('student_id').value=r.student_id;$('date').value=r.lesson_date||r.service_date;$('statusInput').value=r.status;$('payment_status').value=r.payment_status;$('paymentTerms').value=r.payment_terms||'immediate';$('dueDate').value=r.due_date||'';$('cancelReason').value=r.cancellation_reason||'';toggleCredit();toggleCancellation();
  if(kind==='lessons'){$('teacher_id').value=r.teacher_id;$('start_time').value=r.start_time?.slice(0,5)||'09:00';$('end_time').value=r.end_time?.slice(0,5)||'10:00';calculateHours();filterTeacherSubjects(r.subject);$('lesson_location').value=r.lesson_location||'center';$('notes').value=r.notes||''}
- else{$('service_type').value=r.service_type;configure();$('teacher_id').value=r.teacher_id||'';$('description').value=r.description;supabase.from('service_prices').select('amount').eq('service_id',r.id).maybeSingle().then(({data,error})=>{if(editing===r.id&&kind==='services'){if(error)note('تعذر قراءة سعر الخدمة: '+error.message,true);else $('servicePrice').value=data?.amount??''}})}
+ else{$('service_type').value=r.service_type;configure();$('teacher_id').value=r.teacher_id||'';
+if(r.academic_subject_id){const mapping=academicMappings.find(m=>m.subject_id===r.academic_subject_id);const major=academicNodes.find(n=>n.id===mapping?.major_id);const college=academicNodes.find(n=>n.id===major?.parent_id);if(college){$('serviceUniversity').value=String(college.parent_id);refreshServiceAcademic('university');$('serviceCollege').value=String(college.id);refreshServiceAcademic('college');$('serviceMajor').value=String(major.id);refreshServiceAcademic('major');$('serviceSubject').value=r.academic_subject_id;}}
+$('description').value=r.description;supabase.from('service_prices').select('amount').eq('service_id',r.id).maybeSingle().then(({data,error})=>{if(editing===r.id&&kind==='services'){if(error)note('تعذر قراءة سعر الخدمة: '+error.message,true);else $('servicePrice').value=data?.amount??''}})}
  loadPrice();$('formTitle').textContent='تعديل سجل';$('save').textContent='حفظ التعديل';$('cancel').hidden=false;window.scrollTo({top:0,behavior:'smooth'})}
 $('form').addEventListener('submit',async e=>{e.preventDefault();if(!canEdit)return;
  if(kind==='lessons'&&$('statusInput').value==='cancelled'){if(!editing){note('احفظ الحصة أولاً ثم ألغها مع ذكر السبب',true);return}const reason=$('cancelReason').value.trim();if(reason.length<5){note('سبب الإلغاء إجباري، 5 أحرف على الأقل',true);return}if(!confirm('تأكيد إلغاء الحصة مع توثيق السبب؟'))return;$('save').disabled=true;const {error}=await supabase.rpc('cancel_lesson_with_reason',{p_lesson_id:editing,p_reason:reason});$('save').disabled=false;if(error)note('تعذر إلغاء الحصة: '+error.message,true);else{clearForm();note('تم إلغاء الحصة وتوثيق السبب وإشعار المدرس');await load()}return}
