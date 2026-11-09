@@ -80,7 +80,7 @@ $('logout').addEventListener('click',async()=>{await supabase.auth.signOut();loc
 (async()=>{try{const {data:{user},error}=await supabase.auth.getUser();if(error||!user)throw Error('signin');uid=user.id;
  const {data:profile,error:pe}=await supabase.from('staff_profiles').select('role,is_active').eq('user_id',uid).single();
  if(pe||!profile?.is_active)throw Error('permission');role=profile.role;grant=await getGrants(supabase);if(role!=='super_admin'&&!grant('pricing.view')&&!grant('pricing.edit'))throw Error('permission');
- const [s,t]=await Promise.all([supabase.from('students').select('id,full_name').limit(1000),supabase.from('teachers').select('id,full_name').limit(1000)]);
+ const [s,t]=await Promise.all([supabase.from('students').select('id,full_name').limit(1000),supabase.from('teachers').select('id,full_name').eq('is_archived',false).limit(1000)]);
  if(s.error||t.error)throw Error('lookup');
  students=s.data||[];teachers=t.data||[];$('save').hidden=role!=='super_admin'&&!grant('pricing.edit');
  if(role!=='super_admin'&&!grant('pricing.edit')){$('permissions').textContent=' · صلاحية المحاسب: عرض فقط';$('studentRate').disabled=true;$('teacherRate').disabled=true;$('item').disabled=true}
