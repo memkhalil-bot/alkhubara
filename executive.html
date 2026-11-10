@@ -1,0 +1,57 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>المؤشرات التنفيذية | مركز الخبراء</title><link rel="stylesheet" href="./ux-unified.css"><style>
+:root{--ink:#17392f;--green:#0c634d;--muted:#6d8177;--bg:#f4f7f5}body{background:var(--bg);margin:0;font-family:Cairo,Tahoma,Arial,sans-serif;color:var(--ink)}
+main{max-width:1370px;margin:auto;padding:26px 25px 60px}header{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:24px}.intro{margin:0;color:#73867b;font-size:13px}h1{font-size:clamp(22px,3vw,30px);margin:0 0 5px;font-weight:800}.action{border:1px solid #d5e4d9;border-radius:10px;background:white;padding:10px 15px;color:#17604b;font-weight:800;cursor:pointer;text-decoration:none}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.tile{border-radius:17px;padding:24px 23px;min-height:153px;position:relative;display:flex;flex-direction:column;justify-content:space-between;color:white;text-decoration:none;box-shadow:0 9px 22px rgba(11,45,31,.09);transition:transform .18s,box-shadow .18s;overflow:hidden}.tile:after{content:"";position:absolute;inline-size:150px;block-size:150px;border:30px solid #ffffff10;border-radius:50%;inset-inline-end:-70px;inset-block-end:-100px}.tile:hover{transform:translateY(-3px);box-shadow:0 14px 28px rgba(11,45,31,.13)}.tile:focus-visible{outline:3px solid #162c25;outline-offset:3px}.tile .head{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:750}.tile .icon{display:grid;place-items:center;background:#ffffff2b;border-radius:10px;width:36px;height:36px;font-size:18px}.tile strong{font-size:clamp(27px,3vw,36px);line-height:1.15;font-weight:800;letter-spacing:-.4px}.tile small{font-size:11px;color:#ffffffd6}.tile .arrow{position:absolute;inset-inline-start:21px;inset-block-end:22px;font-size:17px}.student{background:linear-gradient(118deg,#087d6d,#0e554e)}.teacher{background:linear-gradient(118deg,#4962c4,#343c91)}.lessons{background:linear-gradient(118deg,#268cbb,#155b85)}.receipts{background:linear-gradient(118deg,#0d8660,#146147)}.expenses{background:linear-gradient(118deg,#d47741,#a45130)}.invoices{background:linear-gradient(118deg,#8a62bf,#64408d)}
+.section{background:white;border:1px solid #e0eae3;padding:22px 24px;border-radius:16px;margin-top:20px}.section h2{font-size:17px;margin:0 0 16px}.sectionhead{display:flex;justify-content:space-between;align-items:center;gap:10px}.caption{font-size:12px;color:var(--muted)}.lines{display:grid;grid-template-columns:1fr 1fr;gap:20px}.line{display:flex;gap:10px;align-items:center;justify-content:space-between;border-bottom:1px solid #edf1ee;padding:10px 0}.line:last-child{border:0}.line b{font-size:17px}.jump{display:inline-flex;gap:7px;align-items:center;text-decoration:none;color:#086349;font-weight:750;font-size:12px}.notice{background:#fbfaf1;border-inline-start:4px solid #d4a140;padding:12px 14px;border-radius:8px;margin:5px 0 0;color:#685d3c;font-size:12px}.fail{background:#fff1f1;border-color:#c55d5d;color:#9b3030}.loading{color:#7f9085}.empty{color:#778b7d;font-size:13px}#app{display:none}
+@media(max-width:900px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:550px){main{padding:17px 14px}.stats{gap:11px}.tile{min-height:133px;padding:15px 14px;border-radius:13px}.tile .head{font-size:12px;gap:6px}.tile .icon{width:29px;height:29px;font-size:15px}.tile strong{font-size:25px}.tile .arrow{inset-inline-start:12px;inset-block-end:12px}.section{padding:16px}.lines{grid-template-columns:1fr}}
+</style></head><body><main><p id="gate" role="status" class="loading">جارٍ التحقق من حسابك...</p><div id="app"><header><div><h1>المؤشرات التنفيذية</h1><p class="intro">نظرة مباشرة على نشاط مركز الخبراء التعليمي</p></div><div><button id="reload" class="action" type="button">↻ تحديث</button> <a class="action" href="./dashboard.html">لوحة التحكم</a></div></header>
+<section class="stats" id="tiles" aria-label="المؤشرات الرئيسية"></section>
+<div class="lines"><section class="section"><div class="sectionhead"><h2>ملخص النشاط</h2><a class="jump" data-target="operations.html" href="./operations.html">الحصص والخدمات ←</a></div><div id="activity" class="empty">جارٍ التحميل...</div></section><section class="section"><div class="sectionhead"><h2>المتابعة المالية</h2><a class="jump" data-target="finance.html" href="./finance.html">الإيرادات والمصروفات ←</a></div><div id="financial" class="empty">جارٍ التحميل...</div></section></div>
+<div id="error" class="notice fail" role="alert" hidden></div>
+<p class="caption" id="updated"></p></div></main>
+<script type="module">
+import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.0';
+const sb=createClient('https://uqjoxgcddpwfbjanzqpy.supabase.co','sb_publishable_-FhtYmDD0qO6mEB2nBE_rQ_j_SE_unY'),$=id=>document.getElementById(id);
+let rights=new Set(),superAdmin=false;
+const allowed=p=>superAdmin||rights.has(p);
+const fmt=n=>Number(n||0).toLocaleString('ar-QA',{maximumFractionDigits:2});
+const money=n=>fmt(n)+' ر.ق';
+function row(label,value){const line=document.createElement('div');line.className='line';const a=document.createElement('span');a.textContent=label;const b=document.createElement('b');b.textContent=value;line.append(a,b);return line}
+async function fetchRows(table,cols){const all=[],pageSize=500;for(let i=0;;i+=pageSize){const {data,error}=await sb.from(table).select(cols).order('id',{ascending:true}).range(i,i+pageSize-1);if(error)throw Error(table+': '+error.message);all.push(...(data||[]));if(!data||data.length<pageSize)break}return all}
+const tileList=[
+ {title:'الطلاب',key:'students',permission:'students.view',href:'people.html?kind=students',icon:'♙',className:'student',hint:'فتح قاعدة بيانات الطلاب'},
+ {title:'المدرسون',key:'teachers',permission:'teachers.view',href:'people.html?kind=teachers',icon:'▣',className:'teacher',hint:'فتح قاعدة بيانات المدرسين'},
+ {title:'الحصص',key:'lessons',permission:'lessons.view',href:'operations.html?kind=lessons',icon:'◷',className:'lessons',hint:'فتح الحصص والخدمات'},
+ {title:'التحصيلات',key:'receipts',permission:'finance.view',href:'finance.html',icon:'↗',className:'receipts',hint:'صافي التحصيلات المسجلة'},
+ {title:'المصروفات',key:'expenses',permission:'finance.view',href:'finance.html',icon:'↘',className:'expenses',hint:'المصروفات المسجلة'},
+ {title:'الفواتير',key:'invoices',permission:'invoices.view',href:'invoices.html',icon:'▤',className:'invoices',hint:'فتح الفواتير والمطابقة'}
+];
+function drawTiles(values){$('tiles').replaceChildren();for(const t of tileList){if(!allowed(t.permission))continue;const a=document.createElement('a');a.className='tile '+t.className;a.href='./'+t.href;a.addEventListener('click',ev=>{if(window.parent===window)return;ev.preventDefault();const route=t.key==='students'||t.key==='teachers'?'people':t.key==='lessons'?'operations':t.key==='invoices'?'invoices':'finance';window.parent.postMessage({type:'alkhubara:navigate',route,kind:t.key==='teachers'?'teachers':t.key==='students'?'students':undefined},location.origin)});a.setAttribute('aria-label',t.title+' — '+t.hint);const head=document.createElement('div');head.className='head';const icon=document.createElement('span');icon.className='icon';icon.textContent=t.icon;head.append(icon,document.createTextNode(t.title));const val=document.createElement('strong');val.textContent=values[t.key]??'—';const foot=document.createElement('small');foot.textContent=t.hint;const arrow=document.createElement('span');arrow.className='arrow';arrow.textContent='←';a.append(head,val,foot,arrow);$('tiles').append(a)}}
+function hideIfNotAllowed(){document.querySelectorAll('[data-target]').forEach(a=>{const dest=a.dataset.target;a.hidden=dest==='operations.html'&&!allowed('lessons.view')||dest==='finance.html'&&!allowed('finance.view')})}
+async function load(){
+ $('reload').disabled=true;$('error').hidden=true;
+ try{
+ const requests=[
+ ['students',allowed('students.view')?fetchRows('students','id,is_archived'):Promise.resolve([])],
+ ['teachers',allowed('teachers.view')?fetchRows('teachers','id,is_archived'):Promise.resolve([])],
+ ['lessons',allowed('lessons.view')?fetchRows('lessons','id,status,hours,is_archived'):Promise.resolve([])],
+ ['entries',allowed('finance.view')?fetchRows('financial_entries','id,entry_type,amount,reverses_entry_id'):Promise.resolve([])],
+ ['invoices',allowed('invoices.view')?fetchRows('invoices','id'):Promise.resolve([])]
+ ];
+ const results=await Promise.all(requests.map(async([key,promise])=>[key,await promise]));const d=Object.fromEntries(results);
+ const validStudents=d.students.filter(x=>!x.is_archived),validTeachers=d.teachers.filter(x=>!x.is_archived),validLessons=d.lessons.filter(x=>!x.is_archived);
+ const reversed=new Set(d.entries.filter(x=>x.entry_type==='reversal').map(x=>x.reverses_entry_id));
+ const validEntries=d.entries.filter(x=>x.entry_type!=='reversal'&&!reversed.has(x.id));
+ const sum=type=>validEntries.filter(x=>x.entry_type===type).reduce((a,x)=>a+Number(x.amount||0),0);
+ const revenue=sum('receipt'),expenses=sum('expense'),teacherPaid=sum('teacher_payment');
+ drawTiles({students:fmt(validStudents.length),teachers:fmt(validTeachers.length),lessons:fmt(validLessons.length),receipts:money(revenue),expenses:money(expenses),invoices:fmt(d.invoices.length)});
+ const active=$('activity');active.replaceChildren();
+ if(allowed('lessons.view')){active.append(row('الحصص المكتملة',fmt(validLessons.filter(x=>x.status==='completed').length)),row('الحصص المجدولة',fmt(validLessons.filter(x=>x.status==='scheduled'||x.status==='confirmed').length)),row('في انتظار المراجعة',fmt(validLessons.filter(x=>x.status==='pending_review').length)),row('الساعات المكتملة',fmt(validLessons.filter(x=>x.status==='completed').reduce((a,x)=>a+Number(x.hours||0),0))))}else active.textContent='لا توجد صلاحية لعرض الحصص';
+ const finance=$('financial');finance.replaceChildren();if(allowed('finance.view'))finance.append(row('تحصيلات مسجلة',money(revenue)),row('مصروفات مسجلة',money(expenses)),row('مدفوعات المدرسين',money(teacherPaid)));else finance.textContent='لا توجد صلاحية لعرض المؤشرات المالية';
+ $('updated').textContent='آخر تحديث: '+new Date().toLocaleString('ar-QA')+' · جميع الأرقام من السجلات غير المؤرشفة أو الحركات غير الملغاة، والتحصيلات تراكمية.';
+ }catch(e){$('error').textContent='تعذر تحديث المؤشرات: '+e.message;$('error').hidden=false;drawTiles({})}
+ finally{$('reload').disabled=false}
+}
+$('reload').onclick=load;
+(async()=>{try{const {data:{user}}=await sb.auth.getUser();if(!user)throw Error('login');const {data:p,error}=await sb.from('staff_profiles').select('role,is_active,deleted_at').eq('user_id',user.id).single();if(error||!p?.is_active||p.deleted_at)throw Error('disabled');superAdmin=p.role==='super_admin';if(!superAdmin){const{data,error:permError}=await sb.from('user_permissions').select('permission');if(permError)throw permError;rights=new Set((data||[]).map(x=>x.permission));if(!rights.has('executive.view'))throw Error('not allowed')}hideIfNotAllowed();$('gate').remove();$('app').style.display='block';load()}catch(e){location.replace('./login.html')}})();
+</script></body></html>
